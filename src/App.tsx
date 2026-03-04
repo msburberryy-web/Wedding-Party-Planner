@@ -1,8 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { addMinutes, parse, format, differenceInMinutes } from 'date-fns';
-import { Download, Plus, Trash2, ArrowUp, ArrowDown, Clock, Settings, Mic, Drama, Globe, Merge, Save, Loader2, FileJson } from 'lucide-react';
+import { Download, Plus, Trash2, ArrowUp, ArrowDown, Clock, Settings, Mic, Drama, Globe, Merge, Save, Loader2, FileJson, Heart, Calendar, MapPin, Users, Sparkles } from 'lucide-react';
 import { Activity, PREDEFINED_ACTIVITY_CATEGORIES } from './constants/activities';
 import ActivityAccordion from './components/ActivityAccordion';
+import TimelineItem from './components/TimelineItem';
 import { generateWeddingExcel, TimelineActivity, WeddingMetadata } from './utils/excelGenerator';
 import { generateTimelineFromPrompt } from './services/geminiService';
 import { translations, Language } from './constants/translations';
@@ -24,7 +26,7 @@ export default function App() {
     brideName: 'Chit Su Hlaing',
     brideFurigana: '',
     guestCount: 60,
-    staffName: 'EI EI',
+    staffName: 'May',
     mcName: 'Myo Nyunt',
     photographers: {
       postHairMakeup: false,
@@ -377,60 +379,78 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f0] text-[#1a1a1a] font-serif">
+    <div className="min-h-screen bg-wedding-stone text-wedding-ink font-sans">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-black/10 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight font-serif-display">{t.title}</h1>
+      <header className="bg-white/70 backdrop-blur-lg border-b border-stone-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-wedding-gold fill-wedding-gold" />
+              <h1 className="text-3xl font-serif font-bold tracking-tight text-wedding-olive">{t.title}</h1>
+            </div>
+            {metadata.groomName && metadata.brideName && (
+              <p className="text-xs text-stone-400 uppercase tracking-widest mt-1 ml-7 font-medium">
+                {metadata.groomName} & {metadata.brideName}
+              </p>
+            )}
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 bg-stone-100 rounded-full px-3 py-1">
-              <Globe className="w-4 h-4 text-stone-500" />
-              <select 
-                value={language} 
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className="text-sm border-none bg-transparent focus:ring-0 cursor-pointer font-sans-body text-stone-600 py-0 pl-0 pr-7"
+
+          <div className="flex items-center gap-4">
+            {/* Language & Stats */}
+            <div className="hidden md:flex items-center gap-6 mr-4">
+              <div className="flex items-center gap-2 bg-stone-100 rounded-full px-4 py-1.5">
+                <Globe className="w-4 h-4 text-stone-400" />
+                <select 
+                  value={language} 
+                  onChange={(e) => setLanguage(e.target.value as Language)}
+                  className="text-xs border-none bg-transparent focus:ring-0 cursor-pointer font-medium text-stone-600 py-0 pl-0 pr-6"
+                >
+                  <option value="en">EN</option>
+                  <option value="ja">JP</option>
+                  <option value="my">MY</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] text-stone-400 uppercase tracking-tighter">{t.used}</span>
+                  <span className={`font-bold ${usedTime > totalTime ? 'text-red-500' : 'text-wedding-olive'}`}>{usedTime}m</span>
+                </div>
+                <div className="w-px h-6 bg-stone-200" />
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] text-stone-400 uppercase tracking-tighter">{t.remaining}</span>
+                  <span className={`font-bold ${remainingTime < 0 ? 'text-red-500' : 'text-emerald-600'}`}>{remainingTime}m</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportJson}
+                className="p-2.5 text-stone-500 hover:text-wedding-olive hover:bg-white rounded-full transition-all border border-transparent hover:border-stone-200"
+                title="Export JSON"
               >
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
-                <option value="my">မြန်မာ</option>
-              </select>
+                <FileJson className="w-5 h-5" />
+              </button>
+              
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-6 py-2.5 bg-wedding-olive text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
+              >
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                <span>{isSaving ? 'Saving...' : 'Save'}</span>
+              </button>
+
+              <button
+                onClick={handleExport}
+                disabled={selectedActivities.length === 0}
+                className="flex items-center gap-2 px-6 py-2.5 bg-wedding-gold text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                <span>Excel</span>
+              </button>
             </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="text-stone-500">{t.used}:</span>
-              <span className={`font-medium ${usedTime > totalTime ? 'text-red-600' : 'text-stone-900'}`}>
-                {usedTime}m
-              </span>
-              <span className="text-stone-300">/</span>
-              <span className="text-stone-500">{t.remaining}:</span>
-              <span className={`font-medium ${remainingTime < 0 ? 'text-red-600' : 'text-emerald-700'}`}>
-                {remainingTime}m
-              </span>
-            </div>
-            <button
-              onClick={handleExportJson}
-              className="bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 px-5 py-2.5 rounded-full text-sm font-sans font-medium transition-colors flex items-center gap-2 mr-2"
-            >
-              <FileJson className="w-4 h-4" />
-              Export JSON
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 px-5 py-2.5 rounded-full text-sm font-sans font-medium transition-colors flex items-center gap-2 mr-2"
-            >
-              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {isSaving ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              onClick={handleExport}
-              disabled={selectedActivities.length === 0}
-              className="bg-[#5A5A40] hover:bg-[#4a4a30] disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full text-sm font-sans font-medium transition-colors"
-            >
-              <Download className="w-4 h-4 inline-block mr-2" />
-              {t.exportPlan}
-            </button>
           </div>
         </div>
       </header>
@@ -442,159 +462,177 @@ export default function App() {
           <div className="lg:col-span-4 space-y-8">
             
             {/* Settings Card */}
-            <div className="bg-white rounded-3xl shadow-sm border border-black/5 p-6">
-              <div className="flex items-center gap-3 mb-5">
-                <Settings className="w-5 h-5 text-stone-400" />
-                <h2 className="font-medium font-sans-body text-lg">{t.configuration}</h2>
+            <div className="glass-card rounded-[2rem] p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-wedding-olive/10 rounded-lg">
+                  <Settings className="w-5 h-5 text-wedding-olive" />
+                </div>
+                <h2 className="font-serif font-bold text-xl">{t.configuration}</h2>
               </div>
               
-              <div className="space-y-5">
+              <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-stone-500 mb-1.5 uppercase tracking-wider font-sans-body">{t.startTime}</label>
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-stone-400 mb-2 uppercase tracking-widest">
+                      <Clock className="w-3 h-3" />
+                      {t.startTime}
+                    </label>
                     <input
                       type="time"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] sm:text-sm font-sans-body"
+                      className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-stone-500 mb-1.5 uppercase tracking-wider font-sans-body">{t.totalTime}</label>
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold text-stone-400 mb-2 uppercase tracking-widest">
+                      <Sparkles className="w-3 h-3" />
+                      {t.totalTime}
+                    </label>
                     <select
                       value={totalTime}
                       onChange={(e) => setTotalTime(Number(e.target.value))}
-                      className="w-full border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] sm:text-sm font-sans-body"
+                      className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                     >
-                      <option value={120}>2 Hours (120m)</option>
-                      <option value={150}>2.5 Hours (150m)</option>
-                      <option value={180}>3 Hours (180m)</option>
-                      <option value={210}>3.5 Hours (210m)</option>
+                      <option value={120}>2 Hours</option>
+                      <option value={150}>2.5 Hours</option>
+                      <option value={180}>3 Hours</option>
+                      <option value={210}>3.5 Hours</option>
                     </select>
                   </div>
                 </div>
 
-                <div className="pt-5 border-t border-black/5">
-                  <h3 className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider font-sans-body">{t.autoPlan}</h3>
+                <div className="pt-6 border-t border-stone-100">
+                  <h3 className="flex items-center gap-1.5 text-[10px] font-bold text-stone-400 mb-3 uppercase tracking-widest">
+                    <Sparkles className="w-3 h-3 text-wedding-gold" />
+                    {t.autoPlan}
+                  </h3>
                   <textarea
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
                     placeholder="e.g., A modern 3-hour wedding with a focus on entertainment and guest interaction."
-                    className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
+                    className="w-full text-sm bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive placeholder:text-stone-300"
                     rows={3}
                   />
                   <button
                     onClick={handleGenerateAiTimeline}
                     disabled={isGenerating || !aiPrompt}
-                    className="w-full mt-2 bg-[#5A5A40] text-white px-4 py-2 text-sm rounded-lg hover:bg-opacity-90 disabled:opacity-60 font-sans-body transition-all flex items-center justify-center"
+                    className="w-full mt-3 bg-wedding-olive text-white px-4 py-3 text-sm rounded-xl hover:bg-opacity-90 disabled:opacity-50 transition-all flex items-center justify-center font-medium shadow-sm"
                   >
                     {isGenerating ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        {t.generating}
-                      </>
-                    ) : t.generatePlan}
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : <Sparkles className="w-4 h-4 mr-2" />}
+                    {isGenerating ? t.generating : t.generatePlan}
                   </button>
-                  {aiError && <p className="text-xs text-red-600 mt-2">{aiError}</p>}
+                  {aiError && <p className="text-xs text-red-500 mt-2 text-center">{aiError}</p>}
                 </div>
 
-                <div className="pt-5 border-t border-black/5">
-                  <h3 className="text-xs font-medium text-stone-500 mb-4 uppercase tracking-wider font-sans-body">{t.eventDetails}</h3>
+                <div className="pt-6 border-t border-stone-100">
+                  <h3 className="flex items-center gap-1.5 text-[10px] font-bold text-stone-400 mb-4 uppercase tracking-widest">
+                    <Calendar className="w-3 h-3" />
+                    {t.eventDetails}
+                  </h3>
                   <div className="space-y-6">
                     
                     {/* Venue */}
                     <div>
-                      <label className="block text-xs font-medium text-stone-600 mb-1.5">{t.venue}</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. East Gallery 5F"
-                        value={metadata.venue}
-                        onChange={e => setMetadata({...metadata, venue: e.target.value})}
-                        className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
-                      />
+                      <label className="block text-[10px] font-bold text-stone-400 mb-2 uppercase tracking-widest">{t.venue}</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300" />
+                        <input
+                          type="text"
+                          placeholder="e.g. East Gallery 5F"
+                          value={metadata.venue}
+                          onChange={e => setMetadata({...metadata, venue: e.target.value})}
+                          className="w-full pl-10 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
+                        />
+                      </div>
                     </div>
 
                     {/* Date & Guests */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-stone-600 mb-1.5">{t.date}</label>
+                        <label className="block text-[10px] font-bold text-stone-400 mb-2 uppercase tracking-widest">{t.date}</label>
                         <input
                           type="date"
                           value={metadata.date}
                           onChange={e => setMetadata({...metadata, date: e.target.value})}
-                          className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
+                          className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-stone-600 mb-1.5">{t.guestCount}</label>
-                        <input
-                          type="number"
-                          value={metadata.guestCount}
-                          onChange={e => setMetadata({...metadata, guestCount: Number(e.target.value)})}
-                          className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
-                        />
+                        <label className="block text-[10px] font-bold text-stone-400 mb-2 uppercase tracking-widest">{t.guestCount}</label>
+                        <div className="relative">
+                          <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300" />
+                          <input
+                            type="number"
+                            value={metadata.guestCount}
+                            onChange={e => setMetadata({...metadata, guestCount: Number(e.target.value)})}
+                            className="w-full pl-10 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
+                          />
+                        </div>
                       </div>
                     </div>
                     
                     {/* Couple */}
-                    <div className="space-y-3 bg-stone-50 p-3 rounded-xl border border-stone-100">
-                      <p className="text-xs font-semibold text-stone-500 uppercase">{t.theCouple}</p>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[10px] font-medium text-stone-500 mb-1">{t.groomName}</label>
+                    <div className="space-y-4 bg-white/40 p-5 rounded-2xl border border-stone-100">
+                      <p className="flex items-center gap-1.5 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                        <Heart className="w-3 h-3 text-wedding-gold" />
+                        {t.theCouple}
+                      </p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2 sm:col-span-1">
+                          <label className="block text-[10px] font-medium text-stone-400 mb-1">{t.groomName}</label>
                           <input
                             type="text"
                             value={metadata.groomName}
                             onChange={e => setMetadata({...metadata, groomName: e.target.value})}
-                            className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
+                            className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                           />
                         </div>
-                        <div>
-                          <label className="block text-[10px] font-medium text-stone-500 mb-1">Furigana</label>
+                        <div className="col-span-2 sm:col-span-1">
+                          <label className="block text-[10px] font-medium text-stone-400 mb-1">Furigana</label>
                           <input
                             type="text"
                             value={metadata.groomFurigana || ''}
                             onChange={e => setMetadata({...metadata, groomFurigana: e.target.value})}
-                            className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
+                            className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                           />
                         </div>
-                        <div>
-                          <label className="block text-[10px] font-medium text-stone-500 mb-1">{t.brideName}</label>
+                        <div className="col-span-2 sm:col-span-1">
+                          <label className="block text-[10px] font-medium text-stone-400 mb-1">{t.brideName}</label>
                           <input
                             type="text"
                             value={metadata.brideName}
                             onChange={e => setMetadata({...metadata, brideName: e.target.value})}
-                            className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
+                            className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                           />
                         </div>
-                        <div>
-                          <label className="block text-[10px] font-medium text-stone-500 mb-1">Furigana</label>
+                        <div className="col-span-2 sm:col-span-1">
+                          <label className="block text-[10px] font-medium text-stone-400 mb-1">Furigana</label>
                           <input
                             type="text"
                             value={metadata.brideFurigana || ''}
                             onChange={e => setMetadata({...metadata, brideFurigana: e.target.value})}
-                            className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
+                            className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Staff & Operations */}
-                    <div className="space-y-3">
-                      <p className="text-xs font-semibold text-stone-500 uppercase">Operations Team</p>
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Operations Team</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-medium text-stone-600 mb-1.5">Planner (Staff)</label>
+                          <label className="block text-[10px] font-medium text-stone-400 mb-1.5">Planner (Staff)</label>
                           <select
                             value={['May'].includes(metadata.staffName) ? metadata.staffName : 'Others'}
                             onChange={(e) => {
                               const val = e.target.value;
                               setMetadata({ ...metadata, staffName: val === 'Others' ? '' : val });
                             }}
-                            className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body mb-2"
+                            className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium mb-2"
                           >
                             <option value="May">{t.may}</option>
                             <option value="Others">{t.others}</option>
@@ -605,19 +643,19 @@ export default function App() {
                               placeholder="Enter Staff Name"
                               value={metadata.staffName}
                               onChange={e => setMetadata({...metadata, staffName: e.target.value})}
-                              className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body animate-in fade-in slide-in-from-top-1"
+                              className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium animate-in fade-in slide-in-from-top-1"
                             />
                           )}
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-stone-600 mb-1.5">Master of Ceremonies</label>
+                          <label className="block text-[10px] font-medium text-stone-400 mb-1.5">Master of Ceremonies</label>
                           <select
                             value={['Ye Ziel', 'Antt Minn', 'Myo Nyunt'].includes(metadata.mcName) ? metadata.mcName : 'Others'}
                             onChange={(e) => {
                               const val = e.target.value;
                               setMetadata({ ...metadata, mcName: val === 'Others' ? '' : val });
                             }}
-                            className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body mb-2"
+                            className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium mb-2"
                           >
                             <option value="Ye Ziel">Ye Ziel</option>
                             <option value="Antt Minn">Antt Minn</option>
@@ -630,7 +668,7 @@ export default function App() {
                               placeholder="Enter MC Name"
                               value={metadata.mcName}
                               onChange={e => setMetadata({...metadata, mcName: e.target.value})}
-                              className="w-full text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body animate-in fade-in slide-in-from-top-1"
+                              className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium animate-in fade-in slide-in-from-top-1"
                             />
                           )}
                         </div>
@@ -700,38 +738,50 @@ export default function App() {
             </div>
 
             {/* Activity Library Card */}
-            <div className="bg-white rounded-3xl shadow-sm border border-black/5 p-6">
-              <h2 className="font-medium font-sans-body text-lg mb-4">{t.activityLibrary}</h2>
+            <div className="glass-card rounded-[2rem] p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-wedding-olive/10 rounded-lg">
+                  <Plus className="w-5 h-5 text-wedding-olive" />
+                </div>
+                <h2 className="font-serif font-bold text-xl">{t.activityLibrary}</h2>
+              </div>
               <div className="overflow-y-auto -mr-2 pr-2 max-h-[45vh]">
                 <ActivityAccordion categories={PREDEFINED_ACTIVITY_CATEGORIES} onAddActivity={handleAddPredefined} language={language} />
               </div>
             </div>
 
             {/* Add Custom Activity Card */}
-            <div className="bg-white rounded-3xl shadow-sm border border-black/5 p-6">
-              <h2 className="font-medium font-sans-body text-lg mb-4">{t.addActivity}</h2>
+            <div className="glass-card rounded-[2rem] p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-wedding-olive/10 rounded-lg">
+                  <Plus className="w-5 h-5 text-wedding-olive" />
+                </div>
+                <h2 className="font-serif font-bold text-xl">{t.addActivity}</h2>
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
                   placeholder="Activity name..."
                   value={customActivity.name}
                   onChange={(e) => setCustomActivity({ ...customActivity, name: e.target.value })}
-                  className="flex-1 text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
+                  className="flex-1 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                 />
-                <input
-                  type="number"
-                  min="1"
-                  title="Duration in minutes"
-                  value={customActivity.duration}
-                  onChange={(e) => setCustomActivity({ ...customActivity, duration: Number(e.target.value) })}
-                  className="w-20 text-sm border-stone-300 rounded-lg shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] font-sans-body"
-                />
+                <div className="relative w-24">
+                  <input
+                    type="number"
+                    min="1"
+                    value={customActivity.duration}
+                    onChange={(e) => setCustomActivity({ ...customActivity, duration: Number(e.target.value) })}
+                    className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium pr-8"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-stone-400 font-mono">m</span>
+                </div>
                 <button
                   onClick={handleAddCustom}
                   disabled={!customActivity.name}
-                  className="bg-stone-900 text-white px-3 py-2 rounded-lg hover:bg-stone-800 disabled:opacity-50 font-sans-body"
+                  className="bg-wedding-olive text-white p-3 rounded-xl hover:bg-opacity-90 disabled:opacity-50 transition-all shadow-sm"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -739,229 +789,56 @@ export default function App() {
 
           {/* Right Main Area - Timeline */}
           <div className="lg:col-span-8">
-            <div className="bg-white rounded-3xl shadow-sm border border-black/5 overflow-hidden">
-              <div className="px-6 py-4 border-b border-black/5 bg-stone-50/50 flex items-center justify-between">
-                <h2 className="font-medium font-sans-body text-lg">{t.timelineSection}</h2>
-                <span className="text-sm text-stone-500 font-sans-body">{selectedActivities.length} items</span>
+            <div className="glass-card rounded-[2.5rem] overflow-hidden min-h-[600px] flex flex-col">
+              <div className="px-8 py-6 border-b border-stone-100 bg-white/30 backdrop-blur-sm flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-wedding-olive text-white rounded-lg shadow-sm">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <h2 className="font-serif font-bold text-2xl text-wedding-olive">{t.timelineSection}</h2>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-stone-100 rounded-full text-[10px] font-bold text-stone-500 uppercase tracking-widest">
+                  <Sparkles className="w-3 h-3 text-wedding-gold" />
+                  {selectedActivities.length} {selectedActivities.length === 1 ? 'Activity' : 'Activities'}
+                </div>
               </div>
               
-              {timeline.length === 0 ? (
-                <div className="p-12 text-center text-stone-400">
-                  <Clock className="w-16 h-16 mx-auto mb-4 opacity-10" />
-                  <p className="font-serif-display text-xl">Your timeline is empty</p>
-                  <p className="text-sm mt-2 font-sans-body">Add activities from the left panel to build your wedding plan.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-black/5">
-                  {timeline.map((act, index) => (
-                    <div key={act.id} className={`p-5 flex items-start gap-5 transition-colors group ${act.isPrep ? 'bg-stone-100/50 border-b border-dashed border-stone-300' : 'hover:bg-stone-50/50 border-b border-black/5'}`}>
-                      {/* Time Column */}
-                      <div className="w-16 shrink-0 text-center pt-1">
-                        <div className={`text-lg font-bold font-sans-body ${act.isImportant ? 'text-red-600' : act.isPrep ? 'text-stone-500' : 'text-stone-900'}`}>
-                          {act.startTime}
-                        </div>
-                        <div className="text-xs text-stone-400 mt-1 font-sans-body">{act.duration}m</div>
+              <div className="flex-1 p-4 sm:p-8">
+                {timeline.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center py-20 text-center">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative mb-8"
+                    >
+                      <div className="absolute inset-0 bg-wedding-gold/20 blur-3xl rounded-full" />
+                      <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-full bg-white shadow-xl text-wedding-gold">
+                        <Heart className="w-12 h-12 fill-wedding-gold/10" />
                       </div>
-
-                      {/* Content Column */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="w-full">
-                            <div className="flex items-center gap-3">
-                                <h3 className={`text-base font-semibold ${act.isPrep ? 'text-stone-600 italic' : 'text-stone-900'}`}>
-                                  {act.isPrep && <span className="text-xs bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded mr-2 not-italic">{t.prep}</span>}
-                                  {language === 'ja' ? (act.nameJa || act.name) : language === 'my' ? (act.nameMy || act.name) : (act.nameEn || act.name)}
-                                </h3>
-                                {act.needsMic && <Mic className="w-4 h-4 text-blue-500" title="Microphone Needed" />}
-                                {act.onStage && <Drama className="w-4 h-4 text-purple-500" title="On Stage" />}
-                            </div>
-                            <div className="mt-3 space-y-3 text-sm font-sans-body">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-stone-500 w-20 shrink-0">{t.duration}:</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={act.duration}
-                                            onChange={(e) => handleUpdateDuration(act.id, Number(e.target.value))}
-                                            className="w-20 text-xs border-stone-300 rounded-md shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] py-1"
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-stone-500 w-20 shrink-0">{t.responsible}:</label>
-                                        <input
-                                            type="text"
-                                            value={act.responsible || ''}
-                                            onChange={(e) => setSelectedActivities(selectedActivities.map(a => a.id === act.id ? { ...a, responsible: e.target.value } : a))}
-                                            className="flex-1 text-xs border-stone-300 rounded-md shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] py-1"
-                                            placeholder="e.g. MC"
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-stone-500 w-20 shrink-0">{t.location}:</label>
-                                        <input
-                                            type="text"
-                                            list="location-suggestions"
-                                            value={act.location || ''}
-                                            onChange={(e) => setSelectedActivities(selectedActivities.map(a => a.id === act.id ? { ...a, location: e.target.value } : a))}
-                                            className="flex-1 text-xs border-stone-300 rounded-md shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] py-1"
-                                            placeholder="e.g. Garden"
-                                        />
-                                        <datalist id="location-suggestions">
-                                          {t.locations && Object.values(t.locations).map(loc => (
-                                            <option key={loc} value={loc} />
-                                          ))}
-                                        </datalist>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-stone-500 w-20 shrink-0">{t.style}:</label>
-                                        <input
-                                            type="text"
-                                            value={act.style || ''}
-                                            onChange={(e) => setSelectedActivities(selectedActivities.map(a => a.id === act.id ? { ...a, style: e.target.value } : a))}
-                                            className="flex-1 text-xs border-stone-300 rounded-md shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] py-1"
-                                            placeholder="e.g. Western"
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
-                                        <label className="text-stone-500 w-20 shrink-0">{t.bgm}:</label>
-                                        <input
-                                            type="text"
-                                            value={act.bgm || ''}
-                                            onChange={(e) => setSelectedActivities(selectedActivities.map(a => a.id === act.id ? { ...a, bgm: e.target.value } : a))}
-                                            className="flex-1 text-xs border-stone-300 rounded-md shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] py-1"
-                                            placeholder="Song Title"
-                                        />
-                                    </div>
-                                    <div className="col-span-1 sm:col-span-2 flex gap-4 pt-1">
-                                        <button
-                                            onClick={() => setSelectedActivities(selectedActivities.map(a => a.id === act.id ? { ...a, needsMic: !a.needsMic } : a))}
-                                            className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs border transition-colors ${
-                                                act.needsMic 
-                                                ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                                                : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
-                                            }`}
-                                        >
-                                            <Mic className="w-3 h-3" />
-                                            {act.needsMic ? t.micNeeded : t.noMic}
-                                        </button>
-                                        <button
-                                            onClick={() => setSelectedActivities(selectedActivities.map(a => a.id === act.id ? { ...a, onStage: !a.onStage } : a))}
-                                            className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs border transition-colors ${
-                                                act.onStage 
-                                                ? 'bg-purple-50 border-purple-200 text-purple-700' 
-                                                : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
-                                            }`}
-                                        >
-                                            <Drama className="w-3 h-3" />
-                                            {act.onStage ? t.onStage : t.offStage}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <label className="text-stone-500 w-20 shrink-0">{t.notes}:</label>
-                                    <textarea
-                                        value={act.coordinationNotes || ''}
-                                        onChange={(e) => setSelectedActivities(selectedActivities.map(a => a.id === act.id ? { ...a, coordinationNotes: e.target.value } : a))}
-                                        className="flex-1 text-xs border-stone-300 rounded-md shadow-sm focus:border-[#5A5A40] focus:ring-[#5A5A40] py-1"
-                                        placeholder="Coordination notes for tech, venue, etc."
-                                        rows={2}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Sub-Activities Section */}
-                            {!act.isPrep && (
-                                <div className="mt-4 pt-3 border-t border-stone-100">
-                                    <div className="space-y-2">
-                                        {act.subActivities?.map(sub => (
-                                            <div key={sub.id} className="flex items-center gap-2 bg-stone-50 p-2 rounded border border-stone-200 text-xs">
-                                                <div className="w-14 text-center font-mono text-stone-500 text-[10px] leading-tight">
-                                                    <div>+{sub.startOffset}m</div>
-                                                    <div>({sub.duration}m)</div>
-                                                </div>
-                                                <input 
-                                                    type="text" 
-                                                    value={sub.name}
-                                                    onChange={(e) => handleUpdateSubActivity(act.id, sub.id, 'name', e.target.value)}
-                                                    className="flex-1 border-stone-300 rounded px-2 py-1 text-xs focus:ring-[#5A5A40] focus:border-[#5A5A40]"
-                                                />
-                                                <div className="flex items-center gap-1">
-                                                    <label className="text-[10px] text-stone-400">Start:</label>
-                                                    <input 
-                                                        type="number" 
-                                                        value={sub.startOffset}
-                                                        onChange={(e) => handleUpdateSubActivity(act.id, sub.id, 'startOffset', Number(e.target.value))}
-                                                        className="w-12 border-stone-300 rounded px-1 py-1 text-xs focus:ring-[#5A5A40] focus:border-[#5A5A40]"
-                                                    />
-                                                </div>
-                                                <div className="flex items-center gap-1">
-                                                    <label className="text-[10px] text-stone-400">Dur:</label>
-                                                    <input 
-                                                        type="number" 
-                                                        value={sub.duration}
-                                                        onChange={(e) => handleUpdateSubActivity(act.id, sub.id, 'duration', Number(e.target.value))}
-                                                        className="w-12 border-stone-300 rounded px-1 py-1 text-xs focus:ring-[#5A5A40] focus:border-[#5A5A40]"
-                                                    />
-                                                </div>
-                                                <button 
-                                                    onClick={() => handleRemoveSubActivity(act.id, sub.id)}
-                                                    className="p-1 text-stone-400 hover:text-red-500"
-                                                >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <button 
-                                        onClick={() => handleAddSubActivity(act.id)}
-                                        className="mt-2 text-xs text-[#5A5A40] hover:text-[#4a4a30] flex items-center gap-1 font-medium"
-                                    >
-                                        <Plus className="w-3 h-3" />
-                                        {t.addConcurrent}
-                                    </button>
-                                </div>
-                            )}
-                          </div>
-                          
-                          {/* Actions */}
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {index > 0 && !act.isPrep && (
-                              <button
-                                onClick={() => handleMakeConcurrent(act.id, timeline[index - 1].id)}
-                                title={t.makeConcurrent}
-                                className="p-2 text-stone-400 hover:text-[#5A5A40] disabled:opacity-30 rounded-full hover:bg-[#5A5A40]/10"
-                              >
-                                <Merge className="w-4 h-4 rotate-90" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleMove(index, 'up')}
-                              disabled={index === 0}
-                              className="p-2 text-stone-400 hover:text-stone-900 disabled:opacity-30 rounded-full hover:bg-stone-200"
-                            >
-                              <ArrowUp className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleMove(index, 'down')}
-                              disabled={index === timeline.length - 1}
-                              className="p-2 text-stone-400 hover:text-stone-900 disabled:opacity-30 rounded-full hover:bg-stone-200"
-                            >
-                              <ArrowDown className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleRemove(act.id)}
-                              className="p-2 text-stone-400 hover:text-red-600 rounded-full hover:bg-red-50 ml-2"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    </motion.div>
+                    <h3 className="font-serif text-3xl text-wedding-ink mb-4">Your timeline is a blank canvas</h3>
+                    <p className="text-stone-400 max-w-sm mx-auto leading-relaxed">
+                      Every great wedding starts with a plan. Add activities from the library or use our AI generator to begin your journey.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="relative space-y-4">
+                    <AnimatePresence mode="popLayout">
+                      {timeline.map((act, index) => (
+                        <TimelineItem
+                          key={act.id}
+                          activity={act}
+                          index={index}
+                          language={language}
+                          onRemove={handleRemove}
+                          onMove={handleMove}
+                          onUpdateDuration={handleUpdateDuration}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

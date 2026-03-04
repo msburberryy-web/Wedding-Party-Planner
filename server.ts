@@ -31,7 +31,7 @@ if (count.count === 0) {
       groomName: 'Man Zaw Nyein',
       brideName: 'Chit Su Hlaing',
       guestCount: 60,
-      staffName: 'EI EI',
+      staffName: 'May',
       mcName: 'Myo Nyunt'
     },
     language: 'en'

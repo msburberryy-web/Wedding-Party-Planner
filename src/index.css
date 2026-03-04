@@ -1,11 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Inter:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-serif-display: 'Cormorant Garamond', serif;
-  --font-sans-body: 'Inter', sans-serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-wedding-cream: #FDFCFB;
+  --color-wedding-stone: #F5F2ED;
+  --color-wedding-ink: #1A1A1A;
+  --color-wedding-olive: #5A5A40;
+  --color-wedding-gold: #C5A059;
 }
 
-body {
-  font-family: var(--font-sans-body);
+@layer base {
+  body {
+    @apply bg-wedding-stone text-wedding-ink font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+}
+
+.glass-card {
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm;
+}
+
+.timeline-line {
+  @apply absolute left-[21px] top-0 bottom-0 w-px bg-stone-200;
+}
+
+.timeline-dot {
+  @apply absolute left-[18px] w-2 h-2 rounded-full bg-wedding-olive border-2 border-wedding-stone z-10;
 }
