@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { addMinutes, parse, format, differenceInMinutes } from 'date-fns';
-import { Download, Plus, Trash2, ArrowUp, ArrowDown, Clock, Settings, Mic, Drama, Globe, Merge, Save, Loader2 } from 'lucide-react';
+import { Download, Plus, Trash2, ArrowUp, ArrowDown, Clock, Settings, Mic, Drama, Globe, Merge, Save, Loader2, FileJson } from 'lucide-react';
 import { Activity, PREDEFINED_ACTIVITY_CATEGORIES } from './constants/activities';
 import ActivityAccordion from './components/ActivityAccordion';
 import { generateWeddingExcel, TimelineActivity, WeddingMetadata } from './utils/excelGenerator';
@@ -50,9 +50,10 @@ export default function App() {
     const id = params.get('planId');
     if (id) {
       setPlanId(id);
+      // Try API first
       fetch(`/api/plans/${id}`)
         .then(res => {
-            if (!res.ok) throw new Error('Plan not found');
+            if (!res.ok) throw new Error('Plan not found in API');
             return res.json();
         })
         .then(data => {
@@ -63,14 +64,28 @@ export default function App() {
           }
         })
         .catch(err => {
-          console.warn('Backend unavailable, trying local storage:', err);
-          const localData = localStorage.getItem(`plan_${id}`);
-          if (localData) {
-            const data = JSON.parse(localData);
-            if (data.activities) setSelectedActivities(data.activities);
-            if (data.metadata) setMetadata(data.metadata);
-            if (data.language) setLanguage(data.language);
-          }
+          console.warn('API load failed, trying client plans folder:', err);
+          // Try fetching from "client plans" folder (static hosting fallback)
+          return fetch(`./client plans/${id}.json`)
+            .then(res => {
+              if (!res.ok) throw new Error('Plan not found in client plans folder');
+              return res.json();
+            })
+            .then(data => {
+              if (data.activities) setSelectedActivities(data.activities);
+              if (data.metadata) setMetadata(data.metadata);
+              if (data.language) setLanguage(data.language);
+            })
+            .catch(err2 => {
+              console.warn('Static file load failed, trying local storage:', err2);
+              const localData = localStorage.getItem(`plan_${id}`);
+              if (localData) {
+                const data = JSON.parse(localData);
+                if (data.activities) setSelectedActivities(data.activities);
+                if (data.metadata) setMetadata(data.metadata);
+                if (data.language) setLanguage(data.language);
+              }
+            });
         });
     }
   }, []);
@@ -120,6 +135,24 @@ export default function App() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleExportJson = () => {
+    const dataToSave = {
+      activities: selectedActivities,
+      metadata,
+      language
+    };
+    const fileName = planId || `${metadata.date}-${metadata.groomName?.trim().charAt(0).toUpperCase() || 'X'}-${metadata.brideName?.trim().charAt(0).toUpperCase() || 'Y'}`;
+    const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${fileName}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   // Calculate timeline
@@ -375,6 +408,13 @@ export default function App() {
                 {remainingTime}m
               </span>
             </div>
+            <button
+              onClick={handleExportJson}
+              className="bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 px-5 py-2.5 rounded-full text-sm font-sans font-medium transition-colors flex items-center gap-2 mr-2"
+            >
+              <FileJson className="w-4 h-4" />
+              Export JSON
+            </button>
             <button
               onClick={handleSave}
               disabled={isSaving}
