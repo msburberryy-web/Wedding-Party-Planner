@@ -1,0 +1,5 @@
+{
+  "name": "Wedding Party Planner",
+  "description": "Generate a wedding party plan timeline and export it to an Excel sheet.",
+  "requestFramePermissions": []
+}
