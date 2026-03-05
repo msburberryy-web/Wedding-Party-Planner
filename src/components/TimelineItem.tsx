@@ -1,8 +1,9 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers, GripVertical } from 'lucide-react';
 import { TimelineActivity } from '../utils/excelGenerator';
 import { Language, translations } from '../constants/translations';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TimelineItemProps {
   activity: TimelineActivity;
@@ -11,6 +12,7 @@ interface TimelineItemProps {
   onRemove: (id: string) => void;
   onMove: (index: number, direction: 'up' | 'down') => void;
   onUpdateDuration: (id: string, duration: number) => void;
+  onUpdateActivity?: (id: string, updates: Partial<TimelineActivity>) => void;
   onMakeConcurrent?: (id: string, parentId: string) => void;
   onRemoveSubActivity?: (parentId: string, subId: string) => void;
   previousActivityId?: string;
@@ -23,23 +25,49 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   onRemove,
   onMove,
   onUpdateDuration,
+  onUpdateActivity,
   onMakeConcurrent,
   onRemoveSubActivity,
   previousActivityId
 }) => {
   const t = translations[language];
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingResponsible, setIsEditingResponsible] = useState(false);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id: activity.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const currentName = language === 'ja' ? activity.nameJa || activity.name : language === 'my' ? activity.nameMy || activity.name : activity.nameEn || activity.name;
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
+    <div
+      ref={setNodeRef}
+      style={style}
       className={`relative pl-12 pr-4 py-6 group transition-all ${
         activity.isImportant ? 'bg-wedding-olive/5' : 'hover:bg-white/50'
-      }`}
+      } ${isDragging ? 'shadow-2xl ring-2 ring-wedding-olive/20 rounded-2xl bg-white' : ''}`}
     >
+      {/* Drag Handle */}
+      <div 
+        {...attributes} 
+        {...listeners}
+        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-stone-300 hover:text-stone-500 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <GripVertical className="w-5 h-5" />
+      </div>
       {/* Timeline Connector */}
       <div className="timeline-line" />
       <div className={`timeline-dot ${activity.isImportant ? 'scale-150 ring-4 ring-wedding-olive/20' : ''}`} />
@@ -65,9 +93,24 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         {/* Content */}
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className={`text-lg font-serif font-semibold ${activity.isImportant ? 'text-wedding-olive' : 'text-wedding-ink'}`}>
-              {language === 'ja' ? activity.nameJa || activity.name : language === 'my' ? activity.nameMy || activity.name : activity.nameEn || activity.name}
-            </h3>
+            {isEditingName ? (
+              <input
+                autoFocus
+                type="text"
+                value={currentName}
+                onBlur={() => setIsEditingName(false)}
+                onChange={(e) => onUpdateActivity?.(activity.id, language === 'ja' ? { nameJa: e.target.value } : language === 'my' ? { nameMy: e.target.value } : { nameEn: e.target.value })}
+                onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
+                className="text-lg font-serif font-semibold bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive"
+              />
+            ) : (
+              <h3 
+                onClick={() => setIsEditingName(true)}
+                className={`text-lg font-serif font-semibold cursor-text hover:underline decoration-wedding-olive/30 ${activity.isImportant ? 'text-wedding-olive' : 'text-wedding-ink'}`}
+              >
+                {currentName}
+              </h3>
+            )}
             {activity.isImportant && (
               <Star className="w-4 h-4 fill-wedding-gold text-wedding-gold" />
             )}
@@ -77,12 +120,27 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           </div>
 
           <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2">
-            {activity.responsible && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                <User className="w-3.5 h-3.5" />
-                <span className="font-medium uppercase tracking-wider">{activity.responsible}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1.5 text-xs text-stone-500">
+              <User className="w-3.5 h-3.5" />
+              {isEditingResponsible ? (
+                <input
+                  autoFocus
+                  type="text"
+                  value={activity.responsible || ''}
+                  onBlur={() => setIsEditingResponsible(false)}
+                  onChange={(e) => onUpdateActivity?.(activity.id, { responsible: e.target.value })}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingResponsible(false)}
+                  className="bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive font-medium uppercase tracking-wider"
+                />
+              ) : (
+                <span 
+                  onClick={() => setIsEditingResponsible(true)}
+                  className="font-medium uppercase tracking-wider cursor-text hover:underline decoration-wedding-olive/30"
+                >
+                  {activity.responsible || 'No PIC'}
+                </span>
+              )}
+            </div>
             {activity.location && (
               <div className="flex items-center gap-1.5 text-xs text-stone-500">
                 <MapPin className="w-3.5 h-3.5" />
@@ -156,7 +214,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

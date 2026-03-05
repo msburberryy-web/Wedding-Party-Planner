@@ -305,6 +305,10 @@ export const PREDEFINED_ACTIVITY_CATEGORIES: ActivityCategory[] = [
       { id: 'r22', name: 'Sending Off End', nameJa: '送賓終了', nameMy: 'ဧည့်သည်ပို့ဆောင်ခြင်း ပြီးဆုံး', duration: 0, isOptional: false, isImportant: true, responsible: 'Staff' },
       { id: 'r23', name: 'Return to Bride Room', nameJa: '新郎新婦ブライズルームへ戻ります', nameMy: 'သတို့သမီးအခန်းသို့ ပြန်ခြင်း', duration: 5, isOptional: false, responsible: 'Couple' },
       { id: 'r24', name: 'After Dine', nameJa: 'アフターダイン', nameMy: 'ပွဲပြီး စားသောက်ခြင်း', duration: 30, isOptional: false, responsible: 'Couple' },
+      { id: 'lib1', name: 'Meal START!', nameJa: '食事START!', nameMy: 'အစားအသောက် စတင်!', duration: 5, isOptional: false, responsible: 'Venue' },
+      { id: 'lib2', name: 'Re-entry', nameJa: '再入場', nameMy: 'ပြန်လည်ဝင်ရောက်ခြင်း', duration: 5, isOptional: false, isImportant: true, onStage: true, responsible: 'Couple' },
+      { id: 'lib3', name: 'Bride & Groom Profile Introduction', nameJa: '新郎新婦プロフィール紹介', nameMy: 'သတို့သားသတို့သမီး ကိုယ်ရေးအကျဉ်း မိတ်ဆက်', duration: 10, isOptional: false, needsMic: true, onStage: true, responsible: 'MC' },
+      { id: 'lib4', name: 'Photo Time', nameJa: '写真タイム', nameMy: 'ဓာတ်ပုံရိုက်ချိန်', duration: 15, isOptional: false, responsible: 'Guests' },
     ]
   },
   {

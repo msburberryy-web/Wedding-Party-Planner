@@ -8,6 +8,21 @@ import TimelineItem from './components/TimelineItem';
 import { generateWeddingExcel, TimelineActivity, WeddingMetadata } from './utils/excelGenerator';
 import { generateTimelineFromPrompt } from './services/geminiService';
 import { translations, Language } from './constants/translations';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy
+} from '@dnd-kit/sortable';
 
 export default function App() {
   const [language, setLanguage] = useState<Language>('en');
@@ -333,6 +348,32 @@ export default function App() {
     setSelectedActivities(selectedActivities.map(a => 
       a.id === id ? { ...a, duration: newDuration } : a
     ));
+  };
+
+  const handleUpdateActivity = (id: string, updates: Partial<Activity>) => {
+    setSelectedActivities(selectedActivities.map(a => 
+      a.id === id ? { ...a, ...updates } : a
+    ));
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setSelectedActivities((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   const handleExport = () => {
@@ -823,22 +864,34 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="relative space-y-4">
-                    <AnimatePresence mode="popLayout">
-                      {timeline.map((act, index) => (
-                        <TimelineItem
-                          key={act.id}
-                          activity={act}
-                          index={index}
-                          language={language}
-                          onRemove={handleRemove}
-                          onMove={handleMove}
-                          onUpdateDuration={handleUpdateDuration}
-                          onMakeConcurrent={handleMakeConcurrent}
-                          onRemoveSubActivity={handleRemoveSubActivity}
-                          previousActivityId={index > 0 ? timeline[index - 1].id : undefined}
-                        />
-                      ))}
-                    </AnimatePresence>
+                    <DndContext 
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext 
+                        items={timeline.map(a => a.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <AnimatePresence mode="popLayout">
+                          {timeline.map((act, index) => (
+                            <TimelineItem
+                              key={act.id}
+                              activity={act}
+                              index={index}
+                              language={language}
+                              onRemove={handleRemove}
+                              onMove={handleMove}
+                              onUpdateDuration={handleUpdateDuration}
+                              onUpdateActivity={handleUpdateActivity}
+                              onMakeConcurrent={handleMakeConcurrent}
+                              onRemoveSubActivity={handleRemoveSubActivity}
+                              previousActivityId={index > 0 ? timeline[index - 1].id : undefined}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </SortableContext>
+                    </DndContext>
                   </div>
                 )}
               </div>
@@ -847,6 +900,19 @@ export default function App() {
 
         </div>
       </main>
+      {/* Footer */}
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-stone-200">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="flex items-center gap-2 text-stone-400">
+            <Sparkles className="w-4 h-4 text-wedding-gold" />
+            <span className="text-xs font-medium uppercase tracking-[0.2em]">Created by</span>
+            <span className="text-sm font-serif font-bold text-wedding-olive tracking-wide">Amore Wedding Tokyo</span>
+          </div>
+          <p className="text-[10px] text-stone-300 uppercase tracking-widest font-medium">
+            &copy; {new Date().getFullYear()} All Rights Reserved
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
