@@ -20,19 +20,19 @@ export default function App() {
   // Metadata state
   const [metadata, setMetadata] = useState<WeddingMetadata>({
     date: '2026-04-12',
-    venue: 'East Gallery 5F',
-    groomName: 'Man Zaw Nyein',
+    venue: 'Wedding Gallery Test',
+    groomName: 'Groom Name',
     groomFurigana: '',
-    brideName: 'Chit Su Hlaing',
+    brideName: 'Bride Name',
     brideFurigana: '',
     guestCount: 60,
     staffName: 'May',
-    mcName: 'Myo Nyunt',
+    mcName: 'Ko Ye',
     photographers: {
       postHairMakeup: false,
-      commemorative: 'ファイブシーズン',
-      snapshot: 'ファイブシーズン',
-      vtr: 'ポイントゼロ'
+      commemorative: 'Amore Wedding Tokyo',
+      snapshot: 'Amore Wedding Tokyo',
+      vtr: 'Amore Wedding Tokyo'
     }
   });
 

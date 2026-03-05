@@ -26,13 +26,13 @@ if (count.count === 0) {
   const sampleData = {
     activities: [],
     metadata: {
-      date: '2026-04-12',
+      date: '2099-12-31',
       venue: 'East Gallery 5F',
-      groomName: 'Man Zaw Nyein',
-      brideName: 'Chit Su Hlaing',
+      groomName: 'Groom Name',
+      brideName: 'Bride Name',
       guestCount: 60,
       staffName: 'May',
-      mcName: 'Myo Nyunt'
+      mcName: 'Ko Ye'
     },
     language: 'en'
   };
