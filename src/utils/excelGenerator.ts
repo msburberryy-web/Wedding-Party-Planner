@@ -303,14 +303,17 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             // Time
             sheet.mergeCells(`A${currentRow}:B${currentRow}`);
             const subTimeCell = subRow.getCell(1);
-            subTimeCell.value = `${sub.startTime} - ${sub.endTime}`;
+            const subStart = sub.startTime || '--:--';
+            const subEnd = sub.endTime || '--:--';
+            subTimeCell.value = `${subStart} - ${subEnd}`;
             subTimeCell.alignment = { horizontal: 'center', vertical: 'middle' };
             subTimeCell.font = { name: 'MS P Mincho', size: 9, italic: true };
             subTimeCell.border = { left: { style: 'thick' }, right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
             // Name (Indented)
             const subNameCell = subRow.getCell(3);
-            subNameCell.value = `  ↳ ${sub.name}`;
+            const subDurationText = sub.duration ? ` (${sub.duration}m)` : '';
+            subNameCell.value = `  ↳ ${sub.name}${subDurationText}`;
             subNameCell.alignment = { vertical: 'middle', indent: 2 };
             subNameCell.font = { name: 'MS P Mincho', size: 10, color: { argb: 'FF444444' } };
             subNameCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };

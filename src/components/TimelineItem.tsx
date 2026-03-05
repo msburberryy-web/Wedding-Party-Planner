@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare } from 'lucide-react';
+import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers } from 'lucide-react';
 import { TimelineActivity } from '../utils/excelGenerator';
 import { Language, translations } from '../constants/translations';
 
@@ -11,6 +11,9 @@ interface TimelineItemProps {
   onRemove: (id: string) => void;
   onMove: (index: number, direction: 'up' | 'down') => void;
   onUpdateDuration: (id: string, duration: number) => void;
+  onMakeConcurrent?: (id: string, parentId: string) => void;
+  onRemoveSubActivity?: (parentId: string, subId: string) => void;
+  previousActivityId?: string;
 }
 
 const TimelineItem: React.FC<TimelineItemProps> = ({
@@ -19,7 +22,10 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   language,
   onRemove,
   onMove,
-  onUpdateDuration
+  onUpdateDuration,
+  onMakeConcurrent,
+  onRemoveSubActivity,
+  previousActivityId
 }) => {
   const t = translations[language];
 
@@ -93,12 +99,23 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
 
           {/* Sub Activities */}
           {activity.subActivities && activity.subActivities.length > 0 && (
-            <div className="mt-4 space-y-2 pl-4 border-l-2 border-stone-100">
+            <div className="mt-4 space-y-2 pl-4 border-l-2 border-wedding-gold/30">
               {activity.subActivities.map((sub) => (
-                <div key={sub.id} className="text-sm text-stone-600 flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-stone-300" />
-                  <span>{language === 'ja' ? sub.nameJa || sub.name : language === 'my' ? sub.nameMy || sub.name : sub.nameEn || sub.name}</span>
-                  <span className="text-xs text-stone-400 font-mono">({sub.duration}m)</span>
+                <div key={sub.id} className="text-sm text-stone-600 flex items-center justify-between group/sub hover:bg-stone-50 p-1 rounded-lg transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-wedding-gold" />
+                    <span className="font-medium">{language === 'ja' ? sub.nameJa || sub.name : language === 'my' ? sub.nameMy || sub.name : sub.nameEn || sub.name}</span>
+                    <span className="text-xs text-stone-400 font-mono">({sub.duration}m)</span>
+                  </div>
+                  {onRemoveSubActivity && (
+                    <button 
+                      onClick={() => onRemoveSubActivity(activity.id, sub.id)}
+                      className="p-1 text-stone-300 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 transition-all"
+                      title="Remove sub-activity"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -121,6 +138,15 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           >
             <ArrowDown className="w-4 h-4" />
           </button>
+          {onMakeConcurrent && previousActivityId && (
+            <button
+              onClick={() => onMakeConcurrent(activity.id, previousActivityId)}
+              className="p-2 text-stone-400 hover:text-wedding-gold hover:bg-white rounded-full transition-colors"
+              title="Make Sub-activity"
+            >
+              <Layers className="w-4 h-4" />
+            </button>
+          )}
           <button
             onClick={() => onRemove(activity.id)}
             className="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"

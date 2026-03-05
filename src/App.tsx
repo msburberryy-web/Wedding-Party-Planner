@@ -833,6 +833,9 @@ export default function App() {
                           onRemove={handleRemove}
                           onMove={handleMove}
                           onUpdateDuration={handleUpdateDuration}
+                          onMakeConcurrent={handleMakeConcurrent}
+                          onRemoveSubActivity={handleRemoveSubActivity}
+                          previousActivityId={index > 0 ? timeline[index - 1].id : undefined}
                         />
                       ))}
                     </AnimatePresence>
