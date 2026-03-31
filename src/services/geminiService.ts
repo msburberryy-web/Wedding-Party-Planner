@@ -1,11 +1,16 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import { Activity, PREDEFINED_ACTIVITY_CATEGORIES } from '../constants/activities';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+const apiKey = process.env.GEMINI_API_KEY;
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const allActivities = PREDEFINED_ACTIVITY_CATEGORIES.flatMap(c => c.activities);
 
 export async function generateTimelineFromPrompt(prompt: string, totalMinutes: number): Promise<string[]> {
+  if (!ai) {
+    throw new Error('Gemini API key is not configured. Please set the GEMINI_API_KEY environment variable.');
+  }
+
   const systemInstruction = `
 You are a professional wedding planner. Your task is to generate a wedding timeline based on a user's prompt.
 
