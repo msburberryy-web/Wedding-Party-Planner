@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { addMinutes, parse, format, differenceInMinutes } from 'date-fns';
 import { Download, Plus, Trash2, ArrowUp, ArrowDown, Clock, Settings, Mic, Drama, Globe, Merge, Save, Loader2, FileJson, Heart, Calendar, MapPin, Users, Sparkles } from 'lucide-react';
@@ -8,6 +8,7 @@ import TimelineItem from './components/TimelineItem';
 import { generateWeddingExcel, TimelineActivity, WeddingMetadata } from './utils/excelGenerator';
 import { generateTimelineFromPrompt } from './services/geminiService';
 import { translations, Language } from './constants/translations';
+import venuesList from './constants/venues.json';
 import {
   DndContext,
   closestCenter,
@@ -78,6 +79,8 @@ export default function App() {
             if (data.data.activities) setSelectedActivities(data.data.activities);
             if (data.data.metadata) setMetadata(data.data.metadata);
             if (data.data.language) setLanguage(data.data.language);
+            if (data.data.startTime) setStartTime(data.data.startTime);
+            if (data.data.totalTime) setTotalTime(data.data.totalTime);
           }
         })
         .catch(err => {
@@ -92,6 +95,8 @@ export default function App() {
               if (data.activities) setSelectedActivities(data.activities);
               if (data.metadata) setMetadata(data.metadata);
               if (data.language) setLanguage(data.language);
+              if (data.startTime) setStartTime(data.startTime);
+              if (data.totalTime) setTotalTime(data.totalTime);
             })
             .catch(err2 => {
               console.warn('Static file load failed, trying local storage:', err2);
@@ -101,6 +106,8 @@ export default function App() {
                 if (data.activities) setSelectedActivities(data.activities);
                 if (data.metadata) setMetadata(data.metadata);
                 if (data.language) setLanguage(data.language);
+                if (data.startTime) setStartTime(data.startTime);
+                if (data.totalTime) setTotalTime(data.totalTime);
               }
             });
         });
@@ -110,9 +117,11 @@ export default function App() {
   const handleSave = async () => {
     setIsSaving(true);
     const dataToSave = {
-      activities: selectedActivities,
+      activities: timeline,
       metadata,
-      language
+      language,
+      startTime,
+      totalTime
     };
 
     const generatedId = planId || `${metadata.date}-${metadata.groomName?.trim().charAt(0).toUpperCase() || 'X'}-${metadata.brideName?.trim().charAt(0).toUpperCase() || 'Y'}`;
@@ -156,9 +165,11 @@ export default function App() {
 
   const handleExportJson = () => {
     const dataToSave = {
-      activities: selectedActivities,
+      activities: timeline,
       metadata,
-      language
+      language,
+      startTime,
+      totalTime
     };
     const fileName = planId || `${metadata.date}-${metadata.groomName?.trim().charAt(0).toUpperCase() || 'X'}-${metadata.brideName?.trim().charAt(0).toUpperCase() || 'Y'}`;
     const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
@@ -172,29 +183,51 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handleImportJson = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const data = JSON.parse(content);
+        if (data.activities) setSelectedActivities(data.activities);
+        if (data.metadata) setMetadata(data.metadata);
+        if (data.language) setLanguage(data.language);
+        if (data.startTime) setStartTime(data.startTime);
+        if (data.totalTime) setTotalTime(data.totalTime);
+        
+        // Reset file input
+        event.target.value = '';
+      } catch (err) {
+        console.error('Failed to parse JSON:', err);
+        alert('Invalid plan file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   // Calculate timeline
   const timeline: TimelineActivity[] = useMemo(() => {
     try {
       const mainStart = parse(startTime, 'HH:mm', new Date());
       
-      // Separate prep and main activities
-      const prepActivities = selectedActivities.filter(a => a.isPrep);
-      const mainActivities = selectedActivities.filter(a => !a.isPrep);
+      if (selectedActivities.length === 0) return [];
 
-      // Calculate Prep Activities (Backwards from start time)
-      let currentPrep = mainStart;
-      const calculatedPrep = prepActivities.slice().reverse().map(act => {
-        const end = format(currentPrep, 'HH:mm');
-        currentPrep = addMinutes(currentPrep, -act.duration);
-        const start = format(currentPrep, 'HH:mm');
-        return { ...act, startTime: start, endTime: end };
-      }).reverse();
+      const calculated: TimelineActivity[] = new Array(selectedActivities.length);
+      
+      // Find the anchor: the first activity that is NOT prep.
+      // If all are prep, or all are main, anchor is 0.
+      let anchorIndex = selectedActivities.findIndex(a => !a.isPrep);
+      if (anchorIndex === -1) anchorIndex = 0;
 
-      // Calculate Main Activities (Forwards from start time)
+      // Calculate forwards from anchor
       let currentMain = mainStart;
-      const calculatedMain = mainActivities.map(act => {
+      for (let i = anchorIndex; i < selectedActivities.length; i++) {
+        const act = selectedActivities[i];
         const start = format(currentMain, 'HH:mm');
-        const actStart = currentMain; // Store for sub-activities
+        const actStart = currentMain;
         currentMain = addMinutes(currentMain, act.duration);
         const end = format(currentMain, 'HH:mm');
 
@@ -209,10 +242,33 @@ export default function App() {
             };
         });
 
-        return { ...act, startTime: start, endTime: end, subActivities };
-      });
+        calculated[i] = { ...act, startTime: start, endTime: end, subActivities };
+      }
 
-      return [...calculatedPrep, ...calculatedMain];
+      // Calculate backwards from anchor
+      let currentPrep = mainStart;
+      for (let i = anchorIndex - 1; i >= 0; i--) {
+        const act = selectedActivities[i];
+        const end = format(currentPrep, 'HH:mm');
+        currentPrep = addMinutes(currentPrep, -act.duration);
+        const start = format(currentPrep, 'HH:mm');
+        const actStart = currentPrep;
+
+        // Calculate Sub-activities
+        const subActivities = act.subActivities?.map(sub => {
+            const subStart = addMinutes(actStart, sub.startOffset || 0);
+            const subEnd = addMinutes(subStart, sub.duration);
+            return {
+                ...sub,
+                startTime: format(subStart, 'HH:mm'),
+                endTime: format(subEnd, 'HH:mm')
+            };
+        });
+
+        calculated[i] = { ...act, startTime: start, endTime: end, subActivities };
+      }
+
+      return calculated;
     } catch (e) {
       return [];
     }
@@ -344,6 +400,26 @@ export default function App() {
     setSelectedActivities(newActivities);
   };
 
+  const handleUpdateStartTime = (newStartTime: string, activityId: string) => {
+    const actIndex = timeline.findIndex(a => a.id === activityId);
+    if (actIndex === -1) return;
+
+    try {
+      const newStart = parse(newStartTime, 'HH:mm', new Date());
+      
+      // Calculate how many minutes from the global startTime this activity currently starts
+      const currentStart = parse(timeline[actIndex].startTime, 'HH:mm', new Date());
+      const globalStart = parse(startTime, 'HH:mm', new Date());
+      const offsetMinutes = differenceInMinutes(currentStart, globalStart);
+      
+      // The new global start time should be newStart - offsetMinutes
+      const newGlobalStart = addMinutes(newStart, -offsetMinutes);
+      setStartTime(format(newGlobalStart, 'HH:mm'));
+    } catch (e) {
+      console.error('Invalid time format', e);
+    }
+  };
+
   const handleUpdateDuration = (id: string, newDuration: number) => {
     setSelectedActivities(selectedActivities.map(a => 
       a.id === id ? { ...a, duration: newDuration } : a
@@ -428,6 +504,8 @@ export default function App() {
             <div className="flex items-center gap-2">
               <Heart className="w-5 h-5 text-wedding-gold fill-wedding-gold" />
               <h1 className="text-3xl font-serif font-bold tracking-tight text-wedding-olive">{t.title}</h1>
+              <div className="h-4 w-px bg-stone-200 mx-2 hidden sm:block" />
+              <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest hidden sm:block">By Amore Wedding Tokyo</span>
             </div>
             {metadata.groomName && metadata.brideName && (
               <p className="text-xs text-stone-400 uppercase tracking-widest mt-1 ml-7 font-medium">
@@ -466,6 +544,21 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2">
+              <input
+                type="file"
+                id="import-json"
+                className="hidden"
+                accept=".json"
+                onChange={handleImportJson}
+              />
+              <button
+                onClick={() => document.getElementById('import-json')?.click()}
+                className="p-2.5 text-stone-500 hover:text-wedding-olive hover:bg-white rounded-full transition-all border border-transparent hover:border-stone-200"
+                title="Import JSON"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+              
               <button
                 onClick={handleExportJson}
                 className="p-2.5 text-stone-500 hover:text-wedding-olive hover:bg-white rounded-full transition-all border border-transparent hover:border-stone-200"
@@ -578,16 +671,32 @@ export default function App() {
                     {/* Venue */}
                     <div>
                       <label className="block text-[10px] font-bold text-stone-400 mb-2 uppercase tracking-widest">{t.venue}</label>
-                      <div className="relative">
+                      <div className="relative mb-2">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-300" />
+                        <select
+                          value={venuesList.includes(metadata.venue) ? metadata.venue : 'Others'}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setMetadata({ ...metadata, venue: val === 'Others' ? '' : val });
+                          }}
+                          className="w-full pl-10 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium appearance-none"
+                        >
+                          <option value="" disabled>Select a venue...</option>
+                          {venuesList.map(v => (
+                            <option key={v} value={v}>{v}</option>
+                          ))}
+                          <option value="Others">{t.others || 'Others'}</option>
+                        </select>
+                      </div>
+                      {(!venuesList.includes(metadata.venue)) && (
                         <input
                           type="text"
-                          placeholder="e.g. East Gallery 5F"
+                          placeholder="Enter Custom Venue"
                           value={metadata.venue}
                           onChange={e => setMetadata({...metadata, venue: e.target.value})}
-                          className="w-full pl-10 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
+                          className="w-full bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium animate-in fade-in slide-in-from-top-1"
                         />
-                      </div>
+                      )}
                     </div>
 
                     {/* Date & Guests */}
@@ -883,7 +992,9 @@ export default function App() {
                               onRemove={handleRemove}
                               onMove={handleMove}
                               onUpdateDuration={handleUpdateDuration}
+                              onUpdateStartTime={handleUpdateStartTime}
                               onUpdateActivity={handleUpdateActivity}
+                              onUpdateSubActivity={handleUpdateSubActivity}
                               onMakeConcurrent={handleMakeConcurrent}
                               onRemoveSubActivity={handleRemoveSubActivity}
                               previousActivityId={index > 0 ? timeline[index - 1].id : undefined}
@@ -900,6 +1011,7 @@ export default function App() {
 
         </div>
       </main>
+
       {/* Footer */}
       <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-stone-200">
         <div className="flex flex-col items-center justify-center gap-4">

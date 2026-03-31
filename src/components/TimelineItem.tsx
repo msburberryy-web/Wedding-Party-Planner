@@ -12,7 +12,9 @@ interface TimelineItemProps {
   onRemove: (id: string) => void;
   onMove: (index: number, direction: 'up' | 'down') => void;
   onUpdateDuration: (id: string, duration: number) => void;
+  onUpdateStartTime?: (newStartTime: string, id: string) => void;
   onUpdateActivity?: (id: string, updates: Partial<TimelineActivity>) => void;
+  onUpdateSubActivity?: (parentId: string, subId: string, field: string, value: any) => void;
   onMakeConcurrent?: (id: string, parentId: string) => void;
   onRemoveSubActivity?: (parentId: string, subId: string) => void;
   previousActivityId?: string;
@@ -25,7 +27,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   onRemove,
   onMove,
   onUpdateDuration,
+  onUpdateStartTime,
   onUpdateActivity,
+  onUpdateSubActivity,
   onMakeConcurrent,
   onRemoveSubActivity,
   previousActivityId
@@ -33,6 +37,8 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const t = translations[language];
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingResponsible, setIsEditingResponsible] = useState(false);
+  const [isEditingStartTime, setIsEditingStartTime] = useState(false);
+  const [editingSubId, setEditingSubId] = useState<string | null>(null);
 
   const {
     attributes,
@@ -75,9 +81,28 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       <div className="flex flex-col md:flex-row md:items-start gap-4">
         {/* Time and Duration */}
         <div className="flex flex-col min-w-[100px]">
-          <span className="text-lg font-mono font-medium text-wedding-olive">
-            {activity.startTime}
-          </span>
+          {isEditingStartTime ? (
+            <input
+              autoFocus
+              type="time"
+              value={activity.startTime}
+              onBlur={() => setIsEditingStartTime(false)}
+              onChange={(e) => {
+                if (onUpdateStartTime) {
+                  onUpdateStartTime(e.target.value, activity.id);
+                }
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && setIsEditingStartTime(false)}
+              className="text-lg font-mono font-medium text-wedding-olive bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive w-24"
+            />
+          ) : (
+            <span 
+              onClick={() => setIsEditingStartTime(true)}
+              className="text-lg font-mono font-medium text-wedding-olive cursor-text hover:underline decoration-wedding-olive/30"
+            >
+              {activity.startTime}
+            </span>
+          )}
           <div className="flex items-center gap-1 text-xs text-stone-400 mt-1">
             <Clock className="w-3 h-3" />
             <input
@@ -160,10 +185,38 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             <div className="mt-4 space-y-2 pl-4 border-l-2 border-wedding-gold/30">
               {activity.subActivities.map((sub) => (
                 <div key={sub.id} className="text-sm text-stone-600 flex items-center justify-between group/sub hover:bg-stone-50 p-1 rounded-lg transition-colors">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-wedding-gold" />
-                    <span className="font-medium">{language === 'ja' ? sub.nameJa || sub.name : language === 'my' ? sub.nameMy || sub.name : sub.nameEn || sub.name}</span>
-                    <span className="text-xs text-stone-400 font-mono">({sub.duration}m)</span>
+                    {editingSubId === sub.id ? (
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          autoFocus
+                          type="text"
+                          value={language === 'ja' ? sub.nameJa || sub.name : language === 'my' ? sub.nameMy || sub.name : sub.nameEn || sub.name}
+                          onBlur={() => setEditingSubId(null)}
+                          onChange={(e) => onUpdateSubActivity?.(activity.id, sub.id, language === 'ja' ? 'nameJa' : language === 'my' ? 'nameMy' : 'nameEn', e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && setEditingSubId(null)}
+                          className="text-sm font-medium bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive flex-1"
+                        />
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            value={sub.duration}
+                            onChange={(e) => onUpdateSubActivity?.(activity.id, sub.id, 'duration', Number(e.target.value))}
+                            className="w-12 text-xs font-mono bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive"
+                          />
+                          <span className="text-[10px] text-stone-400">m</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div 
+                        onClick={() => setEditingSubId(sub.id)}
+                        className="flex items-center gap-2 cursor-text hover:underline decoration-wedding-gold/30 flex-1"
+                      >
+                        <span className="font-medium">{language === 'ja' ? sub.nameJa || sub.name : language === 'my' ? sub.nameMy || sub.name : sub.nameEn || sub.name}</span>
+                        <span className="text-xs text-stone-400 font-mono">({sub.duration}m)</span>
+                      </div>
+                    )}
                   </div>
                   {onRemoveSubActivity && (
                     <button 

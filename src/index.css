@@ -2,15 +2,15 @@
 @import "tailwindcss";
 
 @theme {
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
   --color-wedding-cream: #FDFCFB;
   --color-wedding-stone: #F5F2ED;
   --color-wedding-ink: #1A1A1A;
   --color-wedding-olive: #5A5A40;
   --color-wedding-gold: #C5A059;
-  
-  --font-serif: 'Cormorant Garamond', serif;
-  --font-sans: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
 }
 
 @layer base {
