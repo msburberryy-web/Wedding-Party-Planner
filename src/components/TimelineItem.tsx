@@ -38,6 +38,8 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingResponsible, setIsEditingResponsible] = useState(false);
   const [isEditingStartTime, setIsEditingStartTime] = useState(false);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [editingSubId, setEditingSubId] = useState<string | null>(null);
 
   const {
@@ -57,6 +59,16 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   };
 
   const currentName = language === 'ja' ? activity.nameJa || activity.name : language === 'my' ? activity.nameMy || activity.name : activity.nameEn || activity.name;
+
+  const currentNotes = language === 'ja'
+    ? (activity.coordinationNotesJa || activity.coordinationNotes)
+    : language === 'my'
+    ? (activity.coordinationNotesMy || activity.coordinationNotes)
+    : activity.coordinationNotes;
+
+  const notesUpdateField = language === 'ja' ? 'coordinationNotesJa'
+    : language === 'my' ? 'coordinationNotesMy'
+    : 'coordinationNotes';
 
   return (
     <div
@@ -166,18 +178,48 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                 </span>
               )}
             </div>
-            {activity.location && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-500">
-                <MapPin className="w-3.5 h-3.5" />
-                <span>{activity.location}</span>
-              </div>
-            )}
-            {activity.details && (
-              <div className="flex items-center gap-1.5 text-xs text-stone-400 italic">
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>{activity.details}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1.5 text-xs text-stone-500">
+              <MapPin className="w-3.5 h-3.5" />
+              {isEditingLocation ? (
+                <input
+                  autoFocus
+                  type="text"
+                  value={activity.location || ''}
+                  onBlur={() => setIsEditingLocation(false)}
+                  onChange={(e) => onUpdateActivity?.(activity.id, { location: e.target.value })}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingLocation(false)}
+                  className="bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive font-medium uppercase tracking-wider w-20"
+                  placeholder="場所"
+                />
+              ) : (
+                <span
+                  onClick={() => setIsEditingLocation(true)}
+                  className="font-medium uppercase tracking-wider cursor-text hover:underline decoration-wedding-olive/30 text-stone-400"
+                >
+                  {activity.location || '場所'}
+                </span>
+              )}
+            </div>
+            <div className="flex items-start gap-1.5 text-xs text-stone-400 italic mt-1 w-full">
+              <MessageSquare className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              {isEditingNotes ? (
+                <textarea
+                  autoFocus
+                  value={currentNotes || ''}
+                  onBlur={() => setIsEditingNotes(false)}
+                  onChange={(e) => onUpdateActivity?.(activity.id, { [notesUpdateField]: e.target.value })}
+                  className="flex-1 text-xs bg-white border border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive resize-none"
+                  rows={2}
+                />
+              ) : (
+                <span
+                  onClick={() => setIsEditingNotes(true)}
+                  className="cursor-text hover:underline decoration-wedding-olive/30 leading-relaxed"
+                >
+                  {currentNotes || <span className="text-stone-300">notes...</span>}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Sub Activities */}

@@ -15,6 +15,8 @@ export type Activity = {
   onStage?: boolean;
   responsible?: string; // e.g., 'MC', 'Venue', 'Couple'
   coordinationNotes?: string;
+  coordinationNotesJa?: string;
+  coordinationNotesMy?: string;
   isPrep?: boolean;
   startOffset?: number;
   subActivities?: Activity[];

@@ -476,7 +476,7 @@ export default function App() {
         name: resolveName(sub)
       }))
     }));
-    generateWeddingExcel(exportMetadata, exportTimeline);
+    generateWeddingExcel(exportMetadata, exportTimeline, language);
   };
 
   const handleGenerateAiTimeline = async () => {
