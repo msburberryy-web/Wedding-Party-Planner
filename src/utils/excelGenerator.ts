@@ -23,6 +23,11 @@ export interface TimelineActivity {
   coordinationNotes?: string;
   coordinationNotesJa?: string;
   coordinationNotesMy?: string;
+  staffNotes?: {
+    mc?: string;
+    photo?: string;
+    lighting?: string;
+  };
   isPrep?: boolean;
   startOffset?: number;
   subActivities?: TimelineActivity[];
@@ -361,6 +366,46 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
 
             currentRow++;
         });
+    }
+
+    // Staff Note Rows (MC / Photo / Lighting)
+    if (act.staffNotes) {
+      const staffEntries: Array<{ label: string; text: string; color: string }> = [];
+      if (act.staffNotes.mc) staffEntries.push({ label: '🎤 MC', text: act.staffNotes.mc, color: 'FFD6EAF8' });
+      if (act.staffNotes.photo) staffEntries.push({ label: '📸 Photo/Video', text: act.staffNotes.photo, color: 'FFFDE8D8' });
+      if (act.staffNotes.lighting) staffEntries.push({ label: '💡 Lighting', text: act.staffNotes.lighting, color: 'FFFEF9E7' });
+
+      staffEntries.forEach(({ label, text, color }) => {
+        const staffRow = sheet.getRow(currentRow);
+        staffRow.height = 22;
+
+        sheet.mergeCells(`A${currentRow}:B${currentRow}`);
+        const staffTimeCell = staffRow.getCell(1);
+        staffTimeCell.value = '';
+        staffTimeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+        staffTimeCell.border = { left: { style: 'thick' }, right: { style: 'thin' }, bottom: { style: 'dotted' } };
+
+        const staffLabelCell = staffRow.getCell(3);
+        staffLabelCell.value = label;
+        staffLabelCell.font = { name: 'MS P Mincho', size: 9, bold: true };
+        staffLabelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+        staffLabelCell.alignment = { vertical: 'middle', horizontal: 'center' };
+        staffLabelCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
+
+        const staffLocCell = staffRow.getCell(4);
+        staffLocCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+        staffLocCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
+
+        sheet.mergeCells(`E${currentRow}:I${currentRow}`);
+        const staffContentCell = staffRow.getCell(5);
+        staffContentCell.value = text;
+        staffContentCell.font = { name: 'MS P Mincho', size: 9, italic: true };
+        staffContentCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
+        staffContentCell.alignment = { vertical: 'middle', wrapText: true };
+        staffContentCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
+
+        currentRow++;
+      });
     }
   });
 

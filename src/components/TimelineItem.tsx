@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers, GripVertical } from 'lucide-react';
+import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers, GripVertical, ChevronDown } from 'lucide-react';
 import { TimelineActivity } from '../utils/excelGenerator';
 import { Language, translations } from '../constants/translations';
 import { useSortable } from '@dnd-kit/sortable';
@@ -41,6 +41,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [editingSubId, setEditingSubId] = useState<string | null>(null);
+  const [showStaffNotes, setShowStaffNotes] = useState(false);
 
   const {
     attributes,
@@ -251,7 +252,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div 
+                      <div
                         onClick={() => setEditingSubId(sub.id)}
                         className="flex items-center gap-2 cursor-text hover:underline decoration-wedding-gold/30 flex-1"
                       >
@@ -261,7 +262,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                     )}
                   </div>
                   {onRemoveSubActivity && (
-                    <button 
+                    <button
                       onClick={() => onRemoveSubActivity(activity.id, sub.id)}
                       className="p-1 text-stone-300 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 transition-all"
                       title="Remove sub-activity"
@@ -273,6 +274,39 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
               ))}
             </div>
           )}
+
+          {/* Staff Notes Panel */}
+          <div className="mt-3">
+            <button
+              onClick={() => setShowStaffNotes(!showStaffNotes)}
+              className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-stone-400 hover:text-wedding-olive transition-colors"
+            >
+              <ChevronDown className={`w-3 h-3 transition-transform ${showStaffNotes ? 'rotate-180' : ''}`} />
+              Staff Notes
+            </button>
+            {showStaffNotes && (
+              <div className="mt-2 space-y-2 pl-2 border-l-2 border-stone-100">
+                {[
+                  { key: 'mc', label: '🎤 MC', color: 'bg-blue-50 border-blue-200' },
+                  { key: 'photo', label: '📸 Photo/Video', color: 'bg-orange-50 border-orange-200' },
+                  { key: 'lighting', label: '💡 Lighting', color: 'bg-yellow-50 border-yellow-200' },
+                ].map(({ key, label, color }) => (
+                  <div key={key} className={`rounded-lg border p-2 ${color}`}>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">{label}</div>
+                    <textarea
+                      value={(activity.staffNotes as any)?.[key] || ''}
+                      onChange={(e) => onUpdateActivity?.(activity.id, {
+                        staffNotes: { ...activity.staffNotes, [key]: e.target.value }
+                      })}
+                      placeholder={`Notes for ${label}...`}
+                      className="w-full text-xs bg-transparent border-none p-0 focus:ring-0 resize-none text-stone-600 placeholder-stone-300"
+                      rows={2}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Actions */}
