@@ -462,13 +462,18 @@ export default function App() {
       mcName: metadata.mcName === 'Others' ? 'その他' : metadata.mcName,
     };
 
-    // Create a copy of timeline with Japanese names for export
+    // Resolve the display name using the same language-aware logic as the UI
+    const resolveName = (act: { name: string; nameEn?: string; nameJa?: string; nameMy?: string }) =>
+      language === 'ja' ? (act.nameJa || act.name)
+      : language === 'my' ? (act.nameMy || act.name)
+      : (act.nameEn || act.name);
+
     const exportTimeline = timeline.map(act => ({
       ...act,
-      name: act.nameJa || act.name, // Prefer Japanese name
+      name: resolveName(act),
       subActivities: act.subActivities?.map(sub => ({
         ...sub,
-        name: sub.nameJa || sub.name
+        name: resolveName(sub)
       }))
     }));
     generateWeddingExcel(exportMetadata, exportTimeline);
