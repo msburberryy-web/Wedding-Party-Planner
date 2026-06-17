@@ -58,21 +58,22 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
   // Set column widths to match the image layout
   // Splitting original H (BGM) into H and I for the header section
   sheet.columns = [
-    { width: 8, style: { font: { name: 'MS P Mincho' } } },  // A: Time (Start)
-    { width: 8, style: { font: { name: 'MS P Mincho' } } },  // B: Time (End)
+    { width: 8,  style: { font: { name: 'MS P Mincho' } } }, // A: Time (Start)
+    { width: 8,  style: { font: { name: 'MS P Mincho' } } }, // B: Time (End)
     { width: 25, style: { font: { name: 'MS P Mincho' } } }, // C: Activity Name
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // D: Location
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // E: Content 1
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // F: Content 2
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // G: Content 3
-    { width: 10, style: { font: { name: 'MS P Mincho' } } }, // H: Role (Header) / BGM Part 1
-    { width: 15, style: { font: { name: 'MS P Mincho' } } }, // I: Name (Header) / BGM Part 2
+    { width: 10, style: { font: { name: 'MS P Mincho' } } }, // H: BGM Part 1
+    { width: 15, style: { font: { name: 'MS P Mincho' } } }, // I: BGM Part 2
+    { width: 32, style: { font: { name: 'MS P Mincho' } } }, // J: Staff Attention
   ];
 
   // --- Header Section ---
 
   // Row 1: Title
-  sheet.mergeCells('A1:I1');
+  sheet.mergeCells('A1:J1');
   const titleCell = sheet.getCell('A1');
   titleCell.value = `${metadata.venue}_WEDDING PARTY PLAN`;
   titleCell.font = { name: 'MS P Mincho', size: 18, bold: true, underline: true };
@@ -219,8 +220,11 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
   sheet.mergeCells('H8:I8');
   sheet.getCell('H8').value = 'BGM';
 
+  // J8: Staff Attention column
+  sheet.getCell('J8').value = 'スタッフ';
+
   // Style Headers
-  ['A8', 'C8', 'D8', 'E8', 'H8'].forEach(cellRef => {
+  ['A8', 'C8', 'D8', 'E8', 'H8', 'J8'].forEach(cellRef => {
     const cell = sheet.getCell(cellRef);
     cell.font = { name: 'MS P Mincho', bold: true };
     cell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -232,10 +236,11 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
       right: { style: 'thin' }
     };
   });
-  
+
   // Fix specific borders
   sheet.getCell('A8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thick' }, right: { style: 'thin' } };
-  sheet.getCell('H8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thin' }, right: { style: 'thick' } };
+  sheet.getCell('H8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thin' }, right: { style: 'thin' } };
+  sheet.getCell('J8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thin' }, right: { style: 'thick' } };
 
   headerRow.height = 30;
 
@@ -301,7 +306,19 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     bgmCell.value = bgmText;
     bgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
     bgmCell.alignment = { vertical: 'middle', wrapText: true };
-    bgmCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
+    bgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
+
+    // Staff Attention (J) — stacked icon lines in one cell
+    const staffCell = row.getCell(10);
+    const staffLines: string[] = [];
+    if (act.staffNotes?.mc)       staffLines.push(`🎤 ${act.staffNotes.mc}`);
+    if (act.staffNotes?.photo)    staffLines.push(`📸 ${act.staffNotes.photo}`);
+    if (act.staffNotes?.lighting) staffLines.push(`💡 ${act.staffNotes.lighting}`);
+    staffCell.value = staffLines.join('\n');
+    staffCell.font = { name: 'MS P Mincho', size: 9 };
+    staffCell.alignment = { vertical: 'top', wrapText: true };
+    staffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
+    if (staffLines.length > 0) row.height = Math.max(35, staffLines.length * 28);
 
     currentRow++;
 
@@ -362,56 +379,20 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             subBgmCell.value = subBgmText;
             subBgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
             subBgmCell.alignment = { vertical: 'middle', wrapText: true };
-            subBgmCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
+            subBgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
+
+            // Empty J cell for sub-activity
+            const subStaffCell = subRow.getCell(10);
+            subStaffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
 
             currentRow++;
         });
-    }
-
-    // Staff Note Rows (MC / Photo / Lighting)
-    if (act.staffNotes) {
-      const staffEntries: Array<{ label: string; text: string; color: string }> = [];
-      if (act.staffNotes.mc) staffEntries.push({ label: '🎤 MC', text: act.staffNotes.mc, color: 'FFD6EAF8' });
-      if (act.staffNotes.photo) staffEntries.push({ label: '📸 Photo/Video', text: act.staffNotes.photo, color: 'FFFDE8D8' });
-      if (act.staffNotes.lighting) staffEntries.push({ label: '💡 Lighting', text: act.staffNotes.lighting, color: 'FFFEF9E7' });
-
-      staffEntries.forEach(({ label, text, color }) => {
-        const staffRow = sheet.getRow(currentRow);
-        staffRow.height = 22;
-
-        sheet.mergeCells(`A${currentRow}:B${currentRow}`);
-        const staffTimeCell = staffRow.getCell(1);
-        staffTimeCell.value = '';
-        staffTimeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
-        staffTimeCell.border = { left: { style: 'thick' }, right: { style: 'thin' }, bottom: { style: 'dotted' } };
-
-        const staffLabelCell = staffRow.getCell(3);
-        staffLabelCell.value = label;
-        staffLabelCell.font = { name: 'MS P Mincho', size: 9, bold: true };
-        staffLabelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
-        staffLabelCell.alignment = { vertical: 'middle', horizontal: 'center' };
-        staffLabelCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
-
-        const staffLocCell = staffRow.getCell(4);
-        staffLocCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
-        staffLocCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
-
-        sheet.mergeCells(`E${currentRow}:I${currentRow}`);
-        const staffContentCell = staffRow.getCell(5);
-        staffContentCell.value = text;
-        staffContentCell.font = { name: 'MS P Mincho', size: 9, italic: true };
-        staffContentCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: color } };
-        staffContentCell.alignment = { vertical: 'middle', wrapText: true };
-        staffContentCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
-
-        currentRow++;
-      });
     }
   });
 
   // Bottom Border for the last row
   const lastRowIdx = currentRow - 1;
-  ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'].forEach(col => {
+  ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].forEach(col => {
       const cell = sheet.getCell(`${col}${lastRowIdx}`);
       const currentBorder = cell.border || {};
       cell.border = {
