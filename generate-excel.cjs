@@ -225,10 +225,14 @@ async function generate() {
 
     sheet.mergeCells(`E${currentRow}:G${currentRow}`);
     const contentCell = row.getCell(5);
+    const resolvedNotes = lang === 'ja'
+      ? (act.coordinationNotesJa || act.coordinationNotes)
+      : lang === 'my'
+      ? (act.coordinationNotesMy || act.coordinationNotes)
+      : act.coordinationNotes;
     const parts = [];
     if (act.style) parts.push(`【${act.style}】`);
-    if (act.responsible) parts.push(`[${act.responsible}]`);
-    if (act.coordinationNotes) parts.push(act.coordinationNotes);
+    if (resolvedNotes) parts.push(resolvedNotes);
     contentCell.value = parts.join(' ');
     contentCell.alignment = { vertical: 'middle', wrapText: true };
     contentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };

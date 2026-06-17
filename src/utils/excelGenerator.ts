@@ -21,6 +21,8 @@ export interface TimelineActivity {
   onStage?: boolean;
   responsible?: string;
   coordinationNotes?: string;
+  coordinationNotesJa?: string;
+  coordinationNotesMy?: string;
   isPrep?: boolean;
   startOffset?: number;
   subActivities?: TimelineActivity[];
@@ -44,7 +46,7 @@ export interface WeddingMetadata {
   };
 }
 
-export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: TimelineActivity[]) => {
+export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: TimelineActivity[], language?: string) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Wedding Plan');
 
@@ -269,10 +271,14 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     // Content (E:G)
     sheet.mergeCells(`E${currentRow}:G${currentRow}`);
     const contentCell = row.getCell(5);
+    const resolvedNotes = language === 'ja'
+      ? (act.coordinationNotesJa || act.coordinationNotes)
+      : language === 'my'
+      ? (act.coordinationNotesMy || act.coordinationNotes)
+      : act.coordinationNotes;
     const parts = [];
     if (act.style) parts.push(`【${act.style}】`);
-    if (act.responsible) parts.push(`[${act.responsible}]`);
-    if (act.coordinationNotes) parts.push(act.coordinationNotes);
+    if (resolvedNotes) parts.push(resolvedNotes);
     contentCell.value = parts.join(' ');
     contentCell.alignment = { vertical: 'middle', wrapText: true };
     contentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
@@ -327,10 +333,14 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             // Content
             sheet.mergeCells(`E${currentRow}:G${currentRow}`);
             const subContentCell = subRow.getCell(5);
+            const resolvedSubNotes = language === 'ja'
+              ? (sub.coordinationNotesJa || sub.coordinationNotes)
+              : language === 'my'
+              ? (sub.coordinationNotesMy || sub.coordinationNotes)
+              : sub.coordinationNotes;
             const subParts = [];
             if (sub.style) subParts.push(`【${sub.style}】`);
-            if (sub.responsible) subParts.push(`[${sub.responsible}]`);
-            if (sub.coordinationNotes) subParts.push(sub.coordinationNotes);
+            if (resolvedSubNotes) subParts.push(resolvedSubNotes);
             subContentCell.value = subParts.join(' ');
             subContentCell.alignment = { vertical: 'middle', wrapText: true };
             subContentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };

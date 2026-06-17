@@ -41,7 +41,9 @@
       "isOptional": false,
       "responsible": "Receptionist",
       "isPrep": true,
-      "coordinationNotes": "15:30 First meet — Video & Photo team on standby. Venue setup: banner posters, tent cards, small tables, DMC QR code cards at each seat."
+      "location": "ロビー",
+      "coordinationNotes": "15:30 First meet — Video & Photo team on standby. Venue setup: banner posters, tent cards, small tables, DMC QR code cards at each seat.",
+      "coordinationNotesJa": "15:30 ファーストミート — ビデオ・フォトチームスタンバイ。会場設営：バナー・ポスター・テントカード・小テーブル・DMC QRコードカード各席設置。"
     },
     {
       "id": "prep-groupphotos",
@@ -53,7 +55,9 @@
       "isOptional": false,
       "responsible": "Photographer",
       "isPrep": true,
-      "coordinationNotes": "15:45 — 2F group photo with guests"
+      "location": "2F",
+      "coordinationNotes": "15:45 — 2F group photo with guests",
+      "coordinationNotesJa": "15:45 — 2Fにてゲストと集合写真"
     },
     {
       "id": "prep-chapel-photo",
@@ -65,7 +69,9 @@
       "isOptional": false,
       "responsible": "Photographer",
       "isPrep": true,
-      "coordinationNotes": "16:10~16:30 chapel photoshoot — then couple rests"
+      "location": "チャペル",
+      "coordinationNotes": "16:10~16:30 chapel photoshoot — then couple rests",
+      "coordinationNotesJa": "16:10〜16:30 チャペルにて撮影。終了後、新郎新婦は休憩。"
     },
     {
       "id": "prep-mc",
@@ -77,7 +83,9 @@
       "isOptional": false,
       "responsible": "MC",
       "isPrep": true,
-      "coordinationNotes": "16:00 MC spare check / 16:30 MC confirm BGM. Confirm Type-C BGM for opening slideshow & entrance."
+      "location": "会場内",
+      "coordinationNotes": "16:00 MC spare check / 16:30 MC confirm BGM. Confirm Type-C BGM for opening slideshow & entrance.",
+      "coordinationNotesJa": "16:00 MC予備確認 / 16:30 BGM確認。オープニングスライドショー用BGM（Type-C）を確認すること。"
     },
     {
       "id": "prep-wait",
@@ -88,7 +96,9 @@
       "duration": 10,
       "isOptional": false,
       "responsible": "Couple",
-      "isPrep": true
+      "isPrep": true,
+      "location": "バックステージ",
+      "coordinationNotesJa": "バックステージにて入場待機"
     },
     {
       "id": "lh-1",
@@ -100,8 +110,10 @@
       "isOptional": false,
       "responsible": "Tech",
       "onStage": false,
+      "location": "会場（スクリーン）",
       "bgm": "Type-C",
-      "coordinationNotes": "BGM: Type-C. Slideshow of couple's lifestyle photos & highlight video — plays before entrance begins."
+      "coordinationNotes": "BGM: Type-C. Slideshow of couple's lifestyle photos & highlight video — plays before entrance begins.",
+      "coordinationNotesJa": "BGM：Type-C。カップルのライフスタイル写真＆ハイライト動画スライドショー — 入場前に上映。"
     },
     {
       "id": "lh-2",
@@ -114,8 +126,10 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Groom",
+      "location": "1F 会場",
       "bgm": "Groom Entrance BGM (Type-C)",
-      "coordinationNotes": "BGM: Type-C entrance. Groom enters with friends one by one → waits at centre of floor."
+      "coordinationNotes": "BGM: Type-C entrance. Groom enters with friends one by one → waits at centre of floor.",
+      "coordinationNotesJa": "BGM：Type-C。新郎、友人と一人ずつ入場 → フロア中央で待機。"
     },
     {
       "id": "lh-3",
@@ -128,8 +142,10 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Bride",
+      "location": "バージンロード",
       "bgm": "Bride Entrance BGM",
-      "coordinationNotes": "Bride enters with father → father handover to groom"
+      "coordinationNotes": "Bride enters with father → father handover to groom",
+      "coordinationNotesJa": "新婦が父親とともに入場 → 父親より新郎へバトンタッチ。"
     },
     {
       "id": "lh-4",
@@ -142,7 +158,9 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Couple",
-      "bgm": "Virgin Road BGM"
+      "location": "バージンロード",
+      "bgm": "Virgin Road BGM",
+      "coordinationNotesJa": "お二人でバージンロードをご入場。"
     },
     {
       "id": "lh-5",
@@ -156,7 +174,9 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "MC",
-      "coordinationNotes": "15 min. Tint Htoo Aung (groom) has active role. Mg Mg Phyo officiating — 3 people on stage."
+      "location": "ステージ",
+      "coordinationNotes": "15 min. Tint Htoo Aung (groom) has active role. Mg Mg Phyo officiating — 3 people on stage.",
+      "coordinationNotesJa": "15分。チントゥーアウン（新郎）はアクティブな役割。マウンマウンピョが司式 — ステージ上3名。"
     },
     {
       "id": "lh-6",
@@ -169,7 +189,9 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "Guest (Friend)",
-      "coordinationNotes": "Friend (Mg Mg Phyo) gives welcome speech → Kanpai toast."
+      "location": "ステージ",
+      "coordinationNotes": "Friend (Mg Mg Phyo) gives welcome speech → Kanpai toast.",
+      "coordinationNotesJa": "友人（マウンマウンピョ）ウェルカムスピーチ → 乾杯。"
     },
     {
       "id": "lh-7",
@@ -182,8 +204,10 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Couple",
+      "location": "ステージ",
       "bgm": "Cake BGM",
-      "coordinationNotes": "Sequence (venue confirmed): Cake cutting → First bite (groom feeds bride) → Ring reveal to guests → First kiss."
+      "coordinationNotes": "Sequence (venue confirmed): Cake cutting → First bite (groom feeds bride) → Ring reveal to guests → First kiss.",
+      "coordinationNotesJa": "順番（会場確認済み）：ケーキ入刀 → ファーストバイト（新郎が新婦へ）→ 指輪お披露目 → ファーストキス。"
     },
     {
       "id": "lh-8",
@@ -196,7 +220,9 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Couple",
-      "coordinationNotes": "Guests hold up phone flashlights to send off couple for costume change. Groom's 2nd outfit: T-shirt + coat."
+      "location": "1F 会場",
+      "coordinationNotes": "Guests hold up phone flashlights to send off couple for costume change. Groom's 2nd outfit: T-shirt + coat.",
+      "coordinationNotesJa": "ゲストが携帯フラッシュライトを掲げてお見送り。新郎2着目：Tシャツ＋コート。"
     },
     {
       "id": "lh-9",
@@ -208,7 +234,9 @@
       "isOptional": false,
       "onStage": false,
       "responsible": "MC / Tech",
-      "coordinationNotes": "Distribute game quiz paper + glow sticks to ALL guests. AI/profile video plays simultaneously. Photographer takes table photos during this time."
+      "location": "会場",
+      "coordinationNotes": "Distribute game quiz paper + glow sticks to ALL guests. AI/profile video plays simultaneously. Photographer takes table photos during this time.",
+      "coordinationNotesJa": "ゲスト全員にゲームクイズ用紙＋グロースティック配布。AIプロフィール映像同時上映。カメラマンがテーブル撮影。"
     },
     {
       "id": "lh-10",
@@ -221,8 +249,10 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Couple",
+      "location": "2F ギャラリー",
       "bgm": "Sweet Heart",
-      "coordinationNotes": "Laser show → couple descends from 2F Gallery stairs → Love speech (guests hold lit glow sticks). BGM: Sweet Heart."
+      "coordinationNotes": "Laser show → couple descends from 2F Gallery stairs → Love speech (guests hold lit glow sticks). BGM: Sweet Heart.",
+      "coordinationNotesJa": "レーザーショー → カップルが2Fギャラリー階段より降場 → ラブスピーチ（ゲストがグロースティックを灯す）。BGM：Sweet Heart。"
     },
     {
       "id": "lh-10b",
@@ -235,7 +265,9 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "Guest (Father / Friend)",
-      "coordinationNotes": "1–2 groups (father's side + friend's side). Each group within 5 min. MC to introduce each speaker. Couple stands at front of stage."
+      "location": "ステージ",
+      "coordinationNotes": "1–2 groups (father's side + friend's side). Each group within 5 min. MC to introduce each speaker. Couple stands at front of stage.",
+      "coordinationNotesJa": "1〜2組（父方・友人側）。各グループ5分以内。MCが各スピーカーを紹介。カップルはステージ前方に立つ。"
     },
     {
       "id": "lh-11",
@@ -248,7 +280,9 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "MC",
-      "coordinationNotes": "10 questions about the couple (use the game paper distributed during 中座). Guests with 5+ correct answers win a prize — couple provides prizes. Confirm rehearsal & sound check with MC."
+      "location": "ステージ",
+      "coordinationNotes": "10 questions about the couple (use the game paper distributed during 中座). Guests with 5+ correct answers win a prize — couple provides prizes. Confirm rehearsal & sound check with MC.",
+      "coordinationNotesJa": "10問クイズ（中座中配布のゲーム用紙使用）。5問以上正解者にプレゼント（カップル用意）。MC事前リハーサル・サウンドチェック確認。"
     },
     {
       "id": "lh-12",
@@ -259,7 +293,9 @@
       "duration": 15,
       "isOptional": false,
       "responsible": "Couple / Photo",
-      "coordinationNotes": "Couple visits each table for photos. Table layout: approx. 10 round tables × 30 guests / 9 round tables × 36 guests. Photographer covers all tables."
+      "location": "各テーブル",
+      "coordinationNotes": "Couple visits each table for photos. Table layout: approx. 10 round tables × 30 guests / 9 round tables × 36 guests. Photographer covers all tables.",
+      "coordinationNotesJa": "カップルが各テーブルを訪問し写真撮影。テーブル：約10卓×30名 / 9卓×36名。カメラマン全テーブル対応。"
     },
     {
       "id": "lh-13",
@@ -272,7 +308,9 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "Bride",
-      "coordinationNotes": "Bride reads letter to family with soft backing BGM. Tech: cue music at the start. Tissues ready."
+      "location": "ステージ",
+      "coordinationNotes": "Bride reads letter to family with soft backing BGM. Tech: cue music at the start. Tissues ready.",
+      "coordinationNotesJa": "新婦が家族への手紙を朗読。バッキングBGMあり。Tech：読み始めに音楽をキュー。ティッシュ用意。"
     },
     {
       "id": "lh-14",
@@ -284,7 +322,9 @@
       "isOptional": false,
       "onStage": true,
       "needsMic": true,
-      "responsible": "Groom"
+      "responsible": "Groom",
+      "location": "ステージ",
+      "coordinationNotesJa": "新郎より謝辞。"
     },
     {
       "id": "lh-15",
@@ -297,8 +337,10 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Guests",
+      "location": "1F 会場",
       "bgm": "Flower Shower BGM",
-      "coordinationNotes": "Key highlight moment. Couple walks through flower shower from guests."
+      "coordinationNotes": "Key highlight moment. Couple walks through flower shower from guests.",
+      "coordinationNotesJa": "ハイライトシーン。カップルがゲストのフラワーシャワーの中を歩く。"
     },
     {
       "id": "lh-16",
@@ -310,7 +352,9 @@
       "isOptional": false,
       "onStage": true,
       "responsible": "Bride",
-      "coordinationNotes": "Bride throws bouquet from top of 2F Gallery stairs down to guests at ground floor."
+      "location": "2F 階段",
+      "coordinationNotes": "Bride throws bouquet from top of 2F Gallery stairs down to guests at ground floor.",
+      "coordinationNotesJa": "新婦が2Fギャラリー階段上よりゲストへブーケを投げる。"
     },
     {
       "id": "lh-17",
@@ -321,7 +365,9 @@
       "duration": 10,
       "isOptional": false,
       "responsible": "Photographer",
-      "coordinationNotes": "All guests + couple + family. Photographer coordinates positioning."
+      "location": "会場",
+      "coordinationNotes": "All guests + couple + family. Photographer coordinates positioning.",
+      "coordinationNotesJa": "全員集合写真（ゲスト＋カップル＋ご家族）。カメラマンが配置を調整。"
     },
     {
       "id": "lh-18",
@@ -334,8 +380,10 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Couple",
+      "location": "1F 出口",
       "bgm": "Departure BGM",
-      "coordinationNotes": "Both exit together through 1 door. Guests line both sides and applaud/wave."
+      "coordinationNotes": "Both exit together through 1 door. Guests line both sides and applaud/wave.",
+      "coordinationNotesJa": "お二人が1ドアから退場。ゲストが両サイドに並び拍手・手を振る。"
     },
     {
       "id": "lh-19",
@@ -347,7 +395,9 @@
       "isOptional": false,
       "isImportant": true,
       "responsible": "Couple",
-      "coordinationNotes": "Couple stands at lobby entrance, gives petit gift to each departing guest. Photographer captures farewell moments. Party closes at 19:30."
+      "location": "ロビー",
+      "coordinationNotes": "Couple stands at lobby entrance, gives petit gift to each departing guest. Photographer captures farewell moments. Party closes at 19:30.",
+      "coordinationNotesJa": "カップルがロビー入口に立ち、退場するゲスト一人ひとりにプチギフトを手渡し。カメラマンがお別れシーンを撮影。お開き：19:30。"
     }
   ]
 }
