@@ -43,12 +43,18 @@ function buildTimeline(activities, startTimeStr) {
 }
 
 async function generate() {
+  const lang = planFile.language || 'en';
+  const resolveName = (act) =>
+    lang === 'ja' ? (act.nameJa || act.name)
+    : lang === 'my' ? (act.nameMy || act.name)
+    : (act.nameEn || act.name);
+
   const timeline = buildTimeline(planFile.activities, startTime).map(act => ({
     ...act,
-    name: act.nameJa || act.name,
+    name: resolveName(act),
     subActivities: (act.subActivities || []).map(sub => ({
       ...sub,
-      name: sub.nameJa || sub.name
+      name: resolveName(sub)
     }))
   }));
 
