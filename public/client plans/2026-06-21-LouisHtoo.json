@@ -129,7 +129,12 @@
       "location": "1F 会場",
       "bgm": "Groom Entrance BGM (Type-C)",
       "coordinationNotes": "BGM: Type-C entrance. Groom enters with friends one by one → waits at centre of floor.",
-      "coordinationNotesJa": "BGM：Type-C。新郎、友人と一人ずつ入場 → フロア中央で待機。"
+      "coordinationNotesJa": "BGM：Type-C。新郎、友人と一人ずつ入場 → フロア中央で待機。",
+      "staffNotes": {
+        "mc": "Announce groom's entrance with energy. Wait for groom to reach centre floor before moving on.",
+        "photo": "Position at 1F entrance. Capture groom walking in with friends — wide group shot then close-up on groom's face. VTR rolling.",
+        "lighting": "Spotlight tracking groom from entrance to centre floor. Dim main hall for dramatic effect."
+      }
     },
     {
       "id": "lh-3",
@@ -145,7 +150,12 @@
       "location": "バージンロード",
       "bgm": "Bride Entrance BGM",
       "coordinationNotes": "Bride enters with father → father handover to groom",
-      "coordinationNotesJa": "新婦が父親とともに入場 → 父親より新郎へバトンタッチ。"
+      "coordinationNotesJa": "新婦が父親とともに入場 → 父親より新郎へバトンタッチ。",
+      "staffNotes": {
+        "mc": "Pause and give space at father handover — do not rush this moment.",
+        "photo": "One photographer at end of Virgin Road (stage side). Key shot: father's expression at handover. VTR: capture full walk.",
+        "lighting": "Warm spotlight tracking bride from entrance to stage."
+      }
     },
     {
       "id": "lh-4",
@@ -176,7 +186,12 @@
       "responsible": "MC",
       "location": "ステージ",
       "coordinationNotes": "15 min. Tint Htoo Aung (groom) has active role. Mg Mg Phyo officiating — 3 people on stage.",
-      "coordinationNotesJa": "15分。チントゥーアウン（新郎）はアクティブな役割。マウンマウンピョが司式 — ステージ上3名。"
+      "coordinationNotesJa": "15分。チントゥーアウン（新郎）はアクティブな役割。マウンマウンピョが司式 — ステージ上3名。",
+      "staffNotes": {
+        "mc": "Groom (Tint Htoo Aung) has an active speaking role — confirm his cues beforehand. Officiant: Mg Mg Phyo.",
+        "photo": "Cover: officiant, couple's expressions, and any ring/vow moment close-ups. VTR rolling throughout. 3 people on stage.",
+        "lighting": "Steady, bright, even lighting throughout ceremony. No dramatic changes."
+      }
     },
     {
       "id": "lh-6",
@@ -207,7 +222,12 @@
       "location": "ステージ",
       "bgm": "Cake BGM",
       "coordinationNotes": "Sequence (venue confirmed): Cake cutting → First bite (groom feeds bride) → Ring reveal to guests → First kiss.",
-      "coordinationNotesJa": "順番（会場確認済み）：ケーキ入刀 → ファーストバイト（新郎が新婦へ）→ 指輪お披露目 → ファーストキス。"
+      "coordinationNotesJa": "順番（会場確認済み）：ケーキ入刀 → ファーストバイト（新郎が新婦へ）→ 指輪お披露目 → ファーストキス。",
+      "staffNotes": {
+        "mc": "Narrate each step and build anticipation. Count down before first kiss.",
+        "photo": "4 key shots in sequence: (1) knife on cake, (2) first bite — get both faces, (3) ring reveal — shoot from above/front, (4) first kiss. Do NOT miss ring reveal!",
+        "lighting": "Bright stage lighting. Flash-friendly."
+      }
     },
     {
       "id": "lh-8",
@@ -252,7 +272,12 @@
       "location": "2F ギャラリー",
       "bgm": "Sweet Heart",
       "coordinationNotes": "Laser show → couple descends from 2F Gallery stairs → Love speech (guests hold lit glow sticks). BGM: Sweet Heart.",
-      "coordinationNotesJa": "レーザーショー → カップルが2Fギャラリー階段より降場 → ラブスピーチ（ゲストがグロースティックを灯す）。BGM：Sweet Heart。"
+      "coordinationNotesJa": "レーザーショー → カップルが2Fギャラリー階段より降場 → ラブスピーチ（ゲストがグロースティックを灯す）。BGM：Sweet Heart。",
+      "staffNotes": {
+        "mc": "Build crowd energy before laser show starts. Cue music (Sweet Heart). Let love speech breathe — do not interrupt.",
+        "photo": "VTR: wide shot from 2F showing laser show + staircase descent. Snapshot: couple's faces + full crowd with glowing sticks.",
+        "lighting": "Laser show sequence on cue. After descent, transition to warm romantic lighting for love speech."
+      }
     },
     {
       "id": "lh-10b",
@@ -310,7 +335,12 @@
       "responsible": "Bride",
       "location": "ステージ",
       "coordinationNotes": "Bride reads letter to family with soft backing BGM. Tech: cue music at the start. Tissues ready.",
-      "coordinationNotesJa": "新婦が家族への手紙を朗読。バッキングBGMあり。Tech：読み始めに音楽をキュー。ティッシュ用意。"
+      "coordinationNotesJa": "新婦が家族への手紙を朗読。バッキングBGMあり。Tech：読み始めに音楽をキュー。ティッシュ用意。",
+      "staffNotes": {
+        "mc": "Stand by but remain silent. Cue backing BGM softly at the start of reading.",
+        "photo": "Capture bride reading + family members' reactions. Be discreet — no flash. VTR: steady wide shot.",
+        "lighting": "Soft warm lighting only. Reduce brightness."
+      }
     },
     {
       "id": "lh-14",
@@ -340,7 +370,11 @@
       "location": "1F 会場",
       "bgm": "Flower Shower BGM",
       "coordinationNotes": "Key highlight moment. Couple walks through flower shower from guests.",
-      "coordinationNotesJa": "ハイライトシーン。カップルがゲストのフラワーシャワーの中を歩く。"
+      "coordinationNotesJa": "ハイライトシーン。カップルがゲストのフラワーシャワーの中を歩く。",
+      "staffNotes": {
+        "photo": "Wide shot of full shower + close-up of couple's faces. VTR: overhead angle if possible. This is a key highlight moment.",
+        "lighting": "Full bright warm lighting — joyful and celebratory."
+      }
     },
     {
       "id": "lh-16",
@@ -354,7 +388,11 @@
       "responsible": "Bride",
       "location": "2F 階段",
       "coordinationNotes": "Bride throws bouquet from top of 2F Gallery stairs down to guests at ground floor.",
-      "coordinationNotesJa": "新婦が2Fギャラリー階段上よりゲストへブーケを投げる。"
+      "coordinationNotesJa": "新婦が2Fギャラリー階段上よりゲストへブーケを投げる。",
+      "staffNotes": {
+        "mc": "Gather single women to the floor. Build excitement with countdown.",
+        "photo": "Split: one photographer on stairs with bride, one in crowd below. Capture the toss arc + catch moment."
+      }
     },
     {
       "id": "lh-17",

@@ -17,6 +17,11 @@ export type Activity = {
   coordinationNotes?: string;
   coordinationNotesJa?: string;
   coordinationNotesMy?: string;
+  staffNotes?: {
+    mc?: string;
+    photo?: string;
+    lighting?: string;
+  };
   isPrep?: boolean;
   startOffset?: number;
   subActivities?: Activity[];

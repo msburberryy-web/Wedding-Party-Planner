@@ -71,10 +71,11 @@ async function generate() {
     { width: 15, style: { font: { name: 'MS P Mincho' } } },
     { width: 10, style: { font: { name: 'MS P Mincho' } } },
     { width: 15, style: { font: { name: 'MS P Mincho' } } },
+    { width: 32, style: { font: { name: 'MS P Mincho' } } },
   ];
 
   // Row 1: Title
-  sheet.mergeCells('A1:I1');
+  sheet.mergeCells('A1:J1');
   const titleCell = sheet.getCell('A1');
   titleCell.value = `${metadata.venue}_WEDDING PARTY PLAN`;
   titleCell.font = { name: 'MS P Mincho', size: 18, bold: true, underline: true };
@@ -183,7 +184,9 @@ async function generate() {
   sheet.mergeCells('H8:I8');
   sheet.getCell('H8').value = 'BGM';
 
-  ['A8', 'C8', 'D8', 'E8', 'H8'].forEach(ref => {
+  sheet.getCell('J8').value = 'スタッフ';
+
+  ['A8', 'C8', 'D8', 'E8', 'H8', 'J8'].forEach(ref => {
     const cell = sheet.getCell(ref);
     cell.font = { name: 'MS P Mincho', bold: true };
     cell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -191,7 +194,8 @@ async function generate() {
     cell.border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thin' }, right: { style: 'thin' } };
   });
   sheet.getCell('A8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thick' }, right: { style: 'thin' } };
-  sheet.getCell('H8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thin' }, right: { style: 'thick' } };
+  sheet.getCell('H8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thin' }, right: { style: 'thin' } };
+  sheet.getCell('J8').border = { top: { style: 'thick' }, bottom: { style: 'double' }, left: { style: 'thin' }, right: { style: 'thick' } };
   headerRow.height = 30;
 
   // Data rows
@@ -248,7 +252,19 @@ async function generate() {
     bgmCell.value = bgmText;
     bgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
     bgmCell.alignment = { vertical: 'middle', wrapText: true };
-    bgmCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
+    bgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
+
+    // Staff Attention (J) — stacked icon lines in one cell
+    const staffCell = row.getCell(10);
+    const staffLines = [];
+    if (act.staffNotes && act.staffNotes.mc)       staffLines.push(`🎤 ${act.staffNotes.mc}`);
+    if (act.staffNotes && act.staffNotes.photo)    staffLines.push(`📸 ${act.staffNotes.photo}`);
+    if (act.staffNotes && act.staffNotes.lighting) staffLines.push(`💡 ${act.staffNotes.lighting}`);
+    staffCell.value = staffLines.join('\n');
+    staffCell.font = { name: 'MS P Mincho', size: 9 };
+    staffCell.alignment = { vertical: 'top', wrapText: true };
+    staffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
+    if (staffLines.length > 0) row.height = Math.max(35, staffLines.length * 28);
 
     currentRow++;
 
@@ -283,7 +299,10 @@ async function generate() {
       }
       subBgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
       subBgmCell.alignment = { vertical: 'middle', wrapText: true };
-      subBgmCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
+      subBgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
+
+      // Empty J cell for sub-activity
+      subRow.getCell(10).border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
 
       currentRow++;
     });
@@ -291,7 +310,7 @@ async function generate() {
 
   // Bottom border on last row
   const lastRow = currentRow - 1;
-  ['A','B','C','D','E','F','G','H','I'].forEach(col => {
+  ['A','B','C','D','E','F','G','H','I','J'].forEach(col => {
     const cell = sheet.getCell(`${col}${lastRow}`);
     const b = cell.border || {};
     cell.border = { ...b, bottom: { style: 'thick' } };
