@@ -2,18 +2,29 @@
   "metadata": {
     "date": "2026-06-21",
     "venue": "Hotel Bell Classic",
-    "groomName": "Louis Htoo",
+    "groomName": "Tint Htoo Aung",
+    "groomNickname": "Louis",
     "groomFurigana": "",
-    "brideName": "TBD",
+    "brideName": "Ei Phyu Win",
     "brideFurigana": "",
     "guestCount": 90,
     "staffName": "May",
     "mcName": "Antt Minn",
+    "endTime": "19:30",
     "photographers": {
       "postHairMakeup": true,
       "commemorative": "Amore Wedding Tokyo",
       "snapshot": "Amore Wedding Tokyo",
       "vtr": "Amore Wedding Tokyo"
+    },
+    "extras": {
+      "dessertBuffet": true,
+      "tablePhotoByPhotographer": true,
+      "afterParty": "Confirmed — venue & time TBD",
+      "flowerBringIn": true,
+      "handmadeItemsShowcase": true,
+      "parkingGuide": true,
+      "groomCostumeChange": "2nd outfit: T-shirt + coat (for re-entrance)"
     }
   },
   "language": "en",
@@ -30,7 +41,7 @@
       "isOptional": false,
       "responsible": "Receptionist",
       "isPrep": true,
-      "coordinationNotes": "15:30 First meet — Video & Photo team on standby"
+      "coordinationNotes": "15:30 First meet — Video & Photo team on standby. Venue setup: banner posters, tent cards, small tables, DMC QR code cards at each seat."
     },
     {
       "id": "prep-groupphotos",
@@ -66,7 +77,7 @@
       "isOptional": false,
       "responsible": "MC",
       "isPrep": true,
-      "coordinationNotes": "16:00 MC spare check / 16:30 MC confirm BGM"
+      "coordinationNotes": "16:00 MC spare check / 16:30 MC confirm BGM. Confirm Type-C BGM for opening slideshow & entrance."
     },
     {
       "id": "prep-wait",
@@ -89,8 +100,8 @@
       "isOptional": false,
       "responsible": "Tech",
       "onStage": false,
-      "bgm": "Slideshow BGM",
-      "coordinationNotes": "~5 min slideshow before entrance begins"
+      "bgm": "Type-C",
+      "coordinationNotes": "BGM: Type-C. Slideshow of couple's lifestyle photos & highlight video — plays before entrance begins."
     },
     {
       "id": "lh-2",
@@ -103,8 +114,8 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Groom",
-      "bgm": "Groom Entrance BGM",
-      "coordinationNotes": "Groom enters with friends → waits at middle of 1F"
+      "bgm": "Groom Entrance BGM (Type-C)",
+      "coordinationNotes": "BGM: Type-C entrance. Groom enters with friends one by one → waits at centre of floor."
     },
     {
       "id": "lh-3",
@@ -145,7 +156,7 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "MC",
-      "coordinationNotes": "15 min — Louis (groom) active role. Mg Mg Phyo officiating (3 people on stage)"
+      "coordinationNotes": "15 min. Tint Htoo Aung (groom) has active role. Mg Mg Phyo officiating — 3 people on stage."
     },
     {
       "id": "lh-6",
@@ -158,7 +169,7 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "Guest (Friend)",
-      "coordinationNotes": "Friend (Mg Mg Phyo) gives welcome speech → Kanpai"
+      "coordinationNotes": "Friend (Mg Mg Phyo) gives welcome speech → Kanpai toast."
     },
     {
       "id": "lh-7",
@@ -172,7 +183,7 @@
       "onStage": true,
       "responsible": "Couple",
       "bgm": "Cake BGM",
-      "coordinationNotes": "Sequence: Cake cutting → First bite (groom→bride) → First kiss → Ring reveal"
+      "coordinationNotes": "Sequence (venue confirmed): Cake cutting → First bite (groom feeds bride) → Ring reveal to guests → First kiss."
     },
     {
       "id": "lh-8",
@@ -185,7 +196,7 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Couple",
-      "coordinationNotes": "Guests hold up phone flashlights to send off couple for costume change"
+      "coordinationNotes": "Guests hold up phone flashlights to send off couple for costume change. Groom's 2nd outfit: T-shirt + coat."
     },
     {
       "id": "lh-9",
@@ -197,7 +208,7 @@
       "isOptional": false,
       "onStage": false,
       "responsible": "MC / Tech",
-      "coordinationNotes": "Distribute game paper + glow sticks to all guests. AI movie/profile video plays during costume change."
+      "coordinationNotes": "Distribute game quiz paper + glow sticks to ALL guests. AI/profile video plays simultaneously. Photographer takes table photos during this time."
     },
     {
       "id": "lh-10",
@@ -210,8 +221,21 @@
       "isImportant": true,
       "onStage": true,
       "responsible": "Couple",
-      "bgm": "Re-entrance BGM",
-      "coordinationNotes": "Laser show → couple descends from stairs → Love speech with glow sticks lit by guests"
+      "bgm": "Sweet Heart",
+      "coordinationNotes": "Laser show → couple descends from 2F Gallery stairs → Love speech (guests hold lit glow sticks). BGM: Sweet Heart."
+    },
+    {
+      "id": "lh-10b",
+      "name": "Guest Speeches — Father & Friends",
+      "nameEn": "Guest Speeches — Father & Friends",
+      "nameJa": "ご来客よりご挨拶（父・友人）",
+      "nameMy": "ဧည့်သည်များ မိန့်ခွန်း — ဖခင် & သူငယ်ချင်းများ",
+      "duration": 10,
+      "isOptional": false,
+      "onStage": true,
+      "needsMic": true,
+      "responsible": "Guest (Father / Friend)",
+      "coordinationNotes": "1–2 groups (father's side + friend's side). Each group within 5 min. MC to introduce each speaker. Couple stands at front of stage."
     },
     {
       "id": "lh-11",
@@ -224,7 +248,7 @@
       "onStage": true,
       "needsMic": true,
       "responsible": "MC",
-      "coordinationNotes": "10 questions about the couple. Guest with > 5 correct answers wins a gift. (Louis provides gifts)"
+      "coordinationNotes": "10 questions about the couple (use the game paper distributed during 中座). Guests with 5+ correct answers win a prize — couple provides prizes. Confirm rehearsal & sound check with MC."
     },
     {
       "id": "lh-12",
@@ -235,7 +259,7 @@
       "duration": 15,
       "isOptional": false,
       "responsible": "Couple / Photo",
-      "coordinationNotes": "Couple visits each table for photos with guests"
+      "coordinationNotes": "Couple visits each table for photos. Table layout: approx. 10 round tables × 30 guests / 9 round tables × 36 guests. Photographer covers all tables."
     },
     {
       "id": "lh-13",
@@ -247,7 +271,8 @@
       "isOptional": false,
       "onStage": true,
       "needsMic": true,
-      "responsible": "Bride"
+      "responsible": "Bride",
+      "coordinationNotes": "Bride reads letter to family with soft backing BGM. Tech: cue music at the start. Tissues ready."
     },
     {
       "id": "lh-14",
@@ -273,7 +298,7 @@
       "onStage": true,
       "responsible": "Guests",
       "bgm": "Flower Shower BGM",
-      "coordinationNotes": "Flower shower — highlighted as key moment"
+      "coordinationNotes": "Key highlight moment. Couple walks through flower shower from guests."
     },
     {
       "id": "lh-16",
@@ -285,7 +310,7 @@
       "isOptional": false,
       "onStage": true,
       "responsible": "Bride",
-      "coordinationNotes": "Bride throws bouquet from top of stairs down to guests at ground level"
+      "coordinationNotes": "Bride throws bouquet from top of 2F Gallery stairs down to guests at ground floor."
     },
     {
       "id": "lh-17",
@@ -295,7 +320,8 @@
       "nameMy": "စုပေါင်းဓာတ်ပုံ",
       "duration": 10,
       "isOptional": false,
-      "responsible": "Photographer"
+      "responsible": "Photographer",
+      "coordinationNotes": "All guests + couple + family. Photographer coordinates positioning."
     },
     {
       "id": "lh-18",
@@ -309,7 +335,7 @@
       "onStage": true,
       "responsible": "Couple",
       "bgm": "Departure BGM",
-      "coordinationNotes": "Both exit together through 1 door"
+      "coordinationNotes": "Both exit together through 1 door. Guests line both sides and applaud/wave."
     },
     {
       "id": "lh-19",
@@ -321,7 +347,7 @@
       "isOptional": false,
       "isImportant": true,
       "responsible": "Couple",
-      "coordinationNotes": "Couple stands at lobby entrance, gives petit gift to each departing guest"
+      "coordinationNotes": "Couple stands at lobby entrance, gives petit gift to each departing guest. Photographer captures farewell moments. Party closes at 19:30."
     }
   ]
 }
