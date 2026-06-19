@@ -3,7 +3,14 @@ const { format, parse, addMinutes } = require('date-fns');
 const { ja } = require('date-fns/locale');
 const path = require('path');
 
-const planFile = require('./public/client plans/2026-06-21-LouisHtoo.json');
+// Accept --plan=<relative-path> argument, e.g.:
+//   node generate-excel.cjs --plan="public/client plans/2026-06-21-LouisHtoo.json"
+const planArg = process.argv.find(a => a.startsWith('--plan='));
+const planPath = planArg
+  ? path.resolve(planArg.replace('--plan=', ''))
+  : path.resolve('./public/client plans/2026-06-21-LouisHtoo.json');
+
+const planFile = require(planPath);
 
 const metadata = planFile.metadata;
 const startTime = planFile.startTime;
@@ -316,7 +323,10 @@ async function generate() {
     cell.border = { ...b, bottom: { style: 'thick' } };
   });
 
-  const outPath = path.join(__dirname, 'Wedding_Plan_20260621_Louis_Htoo.xlsx');
+  const dateStr = (metadata.date || '').replace(/[^0-9]/g, '');
+  const groomSlug = (metadata.groomNickname || metadata.groomName || 'Groom').replace(/\s+/g, '_');
+  const brideSlug = (metadata.brideNickname || metadata.brideName || 'Bride').replace(/\s+/g, '_');
+  const outPath = path.join(__dirname, `Wedding_Plan_${dateStr}_${groomSlug}_${brideSlug}.xlsx`);
   await workbook.xlsx.writeFile(outPath);
   console.log('Generated:', outPath);
 }
