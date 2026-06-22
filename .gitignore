@@ -7,3 +7,4 @@ coverage/
 .env*
 !.env.example
 Wedding_Plan_*.xlsx
+*.db
