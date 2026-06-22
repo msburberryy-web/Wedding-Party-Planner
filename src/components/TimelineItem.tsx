@@ -282,7 +282,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
               className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-stone-400 hover:text-wedding-olive transition-colors"
             >
               <ChevronDown className={`w-3 h-3 transition-transform ${showStaffNotes ? 'rotate-180' : ''}`} />
-              Staff Notes
+              Staff & Media
             </button>
             {showStaffNotes && (
               <div className="mt-2 space-y-2 pl-2 border-l-2 border-stone-100">
@@ -290,6 +290,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                   { key: 'mc', label: '🎤 MC', color: 'bg-blue-50 border-blue-200' },
                   { key: 'photo', label: '📸 Photo/Video', color: 'bg-orange-50 border-orange-200' },
                   { key: 'lighting', label: '💡 Lighting', color: 'bg-yellow-50 border-yellow-200' },
+                  { key: 'escort', label: '🧭 Escort', color: 'bg-green-50 border-green-200' },
                 ].map(({ key, label, color }) => (
                   <div key={key} className={`rounded-lg border p-2 ${color}`}>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">{label}</div>
@@ -304,6 +305,32 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                     />
                   </div>
                 ))}
+                <div className="rounded-lg border p-2 bg-purple-50 border-purple-200">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">🎵 BGM URL</div>
+                  <input
+                    type="url"
+                    value={activity.bgmUrl || ''}
+                    onChange={(e) => onUpdateActivity?.(activity.id, { bgmUrl: e.target.value })}
+                    placeholder="YouTube or music URL..."
+                    className="w-full text-xs bg-transparent border-none p-0 focus:ring-0 text-stone-600 placeholder-stone-300"
+                  />
+                  {activity.bgmUrl && (
+                    <a href={activity.bgmUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] text-purple-500 hover:underline mt-0.5 block">▶ Open link</a>
+                  )}
+                </div>
+                <div className="rounded-lg border p-2 bg-slate-50 border-slate-200">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">📽 Projector / Screen</div>
+                  <input
+                    type="text"
+                    value={activity.projector || ''}
+                    onChange={(e) => onUpdateActivity?.(activity.id, { projector: e.target.value })}
+                    placeholder="Slideshow URL, file name, or note..."
+                    className="w-full text-xs bg-transparent border-none p-0 focus:ring-0 text-stone-600 placeholder-stone-300"
+                  />
+                  {activity.projector && activity.projector.startsWith('http') && (
+                    <a href={activity.projector} target="_blank" rel="noopener noreferrer" className="text-[10px] text-slate-500 hover:underline mt-0.5 block">▶ Open link</a>
+                  )}
+                </div>
               </div>
             )}
           </div>

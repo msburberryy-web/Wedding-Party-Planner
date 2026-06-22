@@ -17,10 +17,13 @@ export type Activity = {
   coordinationNotes?: string;
   coordinationNotesJa?: string;
   coordinationNotesMy?: string;
+  bgmUrl?: string;
+  projector?: string;
   staffNotes?: {
     mc?: string;
     photo?: string;
     lighting?: string;
+    escort?: string;
   };
   isPrep?: boolean;
   startOffset?: number;
@@ -541,17 +544,180 @@ export const PREDEFINED_ACTIVITY_CATEGORIES: ActivityCategory[] = [
         onStage: true, 
         responsible: 'Photographer' 
       },
-      { 
-        id: '11', 
-        name: 'Costume Change', 
+      {
+        id: '11',
+        name: 'Costume Change',
         nameEn: 'Costume Change',
         nameJa: 'お色直し',
         nameMy: 'သတို့သား၊ သတို့သမီး ဝတ်စုံလဲလှယ်ရန် ခေတထွက်ခွာခြင်း',
-        duration: 30, 
-        isOptional: true, 
-        isImportant: true, 
-        responsible: 'Couple' 
+        duration: 30,
+        isOptional: true,
+        isImportant: true,
+        responsible: 'Couple'
       },
     ]
-  }
+  },
+  {
+    name: 'Daytime Luncheon',
+    activities: [
+      {
+        id: 'dl1',
+        name: 'Dressing Room + Rehearsal',
+        nameEn: 'Dressing Room + Rehearsal',
+        nameJa: '控室入り・リハーサル',
+        nameMy: 'ဝတ်စုံပြင်ဆင်ခြင်းနှင့် အစမ်းလေ့ကျင့်',
+        duration: 60,
+        isOptional: false,
+        isPrep: true,
+        responsible: 'Couple',
+        coordinationNotes: 'Couple arrives at venue. Hair, makeup, outfit prep. Rehearsal as needed.',
+        coordinationNotesJa: '控室へのご案内。ヘアメイク・お支度。リハーサル実施。',
+      },
+      {
+        id: 'dl2',
+        name: 'Wedding Ceremony on Stage',
+        nameEn: 'Wedding Ceremony on Stage',
+        nameJa: 'ウェディングセレモニー 🎭',
+        nameMy: 'မင်္ဂလာပွဲ ကျင်းပခြင်း (ステージ)',
+        duration: 15,
+        isOptional: false,
+        isImportant: true,
+        onStage: true,
+        needsMic: true,
+        responsible: 'MC',
+        coordinationNotes: 'Ceremony on stage: Vow exchange → Ring exchange → Flower/blessing. MC supports from stage right.',
+        coordinationNotesJa: 'ステージにてセレモニー。誓いの言葉 → 指輪交換 → 花束贈呈・祝福。MCはステージ右側より進行サポート。',
+        staffNotes: {
+          mc: 'Cue each step: vow → ring → flower.',
+          photo: 'Front of stage: close-up vow, ring on finger, flower moment.',
+          lighting: 'Soft warm ceremony lighting. No sudden changes.',
+          escort: 'Ensure ceremony participants (flower bearer, ring bearer) are in position before start.',
+        },
+        subActivities: [
+          { id: 'dl2-vow', name: 'Vow Exchange', nameJa: '誓いの言葉', duration: 5, startOffset: 0, isOptional: false },
+          { id: 'dl2-ring', name: 'Ring Exchange', nameJa: '指輪交換', duration: 5, startOffset: 5, isOptional: false },
+          { id: 'dl2-flower', name: 'Flower / Blessing', nameJa: '花束贈呈・祝福', duration: 5, startOffset: 10, isOptional: false },
+        ],
+      },
+      {
+        id: 'dl3',
+        name: 'Couple Table Greeting Rounds',
+        nameEn: 'Couple Table Greeting Rounds',
+        nameJa: 'お二人テーブル挨拶回り 🎭',
+        nameMy: 'ဇနီးမောင်နှံ စားပွဲများသို့ ကြိုဆိုနှုတ်ဆက်',
+        duration: 15,
+        isOptional: false,
+        responsible: 'Couple',
+        coordinationNotes: 'Couple visits each table to greet guests right after ceremony (~5 min per table). Photographer follows.',
+        coordinationNotesJa: 'セレモニー後、お二人が各テーブルをラウンドしてご挨拶。各テーブル約5分。カメラマン随行。',
+        staffNotes: {
+          photo: 'Follow couple to each table for candid greeting photos.',
+          escort: 'Guide couple from table to table. Keep them on schedule.',
+        },
+      },
+      {
+        id: 'dl4',
+        name: 'Cross Toast + First Kiss',
+        nameEn: 'Cross Toast + First Kiss',
+        nameJa: 'クロストースト・ファーストキス',
+        nameMy: 'Cross Toast + ပထမနမ်းရှုပ်ခြင်း',
+        duration: 5,
+        isOptional: true,
+        onStage: true,
+        responsible: 'Couple',
+        coordinationNotes: 'After Campai: couple interlock arms and drink together (cross toast) → first kiss.',
+        coordinationNotesJa: '乾杯後：お二人が腕を絡めてお飲み（クロストースト）→ ファーストキス。',
+        staffNotes: {
+          photo: 'Capture cross toast arm interlock + first kiss — do not miss!',
+        },
+      },
+      {
+        id: 'dl5',
+        name: 'Love Speech (Couple to Each Other)',
+        nameEn: 'Love Speech (Couple to Each Other)',
+        nameJa: 'ラブスピーチ（お互いに）',
+        nameMy: 'Love Speech（နှစ်ဦးအချင်းချင်း）',
+        duration: 10,
+        isOptional: false,
+        needsMic: true,
+        onStage: true,
+        responsible: 'Couple',
+        coordinationNotes: 'Groom reads love speech to bride, then bride to groom. Seated at chairs by main table.',
+        coordinationNotesJa: '新郎→新婦、新婦→新郎の順でラブスピーチ。メインテーブルの椅子に着席して。',
+        staffNotes: {
+          mc: 'Introduce love speech segment. Cue groom then bride.',
+          photo: 'Capture emotional reactions of both during speech.',
+        },
+      },
+      {
+        id: 'dl6',
+        name: 'Lottery Game (Gift Tag Numbers)',
+        nameEn: 'Lottery Game (Gift Tag Numbers)',
+        nameJa: 'ゲーム（抽選：引き出物番号）',
+        nameMy: 'ဂိမ်း（ကံစမ်းမဲ：လက်ဆောင်ထုပ် နံပါတ်）',
+        duration: 15,
+        isOptional: true,
+        needsMic: true,
+        responsible: 'MC',
+        coordinationNotes: 'MC draws numbers from gift bag tags. Matching guests win a prize. Prepare 5 prizes.',
+        coordinationNotesJa: '★ギフト用意。引き出物に貼ってある番号でくじ引き。MCが番号を引き、当選者に景品（5個）をプレゼント。',
+        staffNotes: {
+          mc: 'Draw gift tag numbers. Announce winner. Gift + photo with couple.',
+          escort: 'Hand prizes to MC before game starts. Escort winners to front for photo.',
+        },
+      },
+      {
+        id: 'dl7',
+        name: 'Slideshow / Movie Screening (During Dress Change)',
+        nameEn: 'Slideshow / Movie Screening (During Dress Change)',
+        nameJa: 'スライドショー・ムービー上映（中座中）',
+        nameMy: 'Slideshow/Movie ပြသ（ဝတ်စုံလဲစဉ်）',
+        duration: 15,
+        isOptional: false,
+        responsible: 'Tech/MC',
+        coordinationNotes: 'Play profile slideshow or movie while couple changes. MC hosts the screening.',
+        coordinationNotesJa: 'お色直し中にスライドショーまたはムービーを上映。MC→ゲストへ案内しながら進行。',
+        staffNotes: {
+          mc: 'Host screening. Keep guests engaged with commentary.',
+          lighting: 'Dim venue lights for screen visibility during screening.',
+        },
+      },
+      {
+        id: 'dl8',
+        name: 'Re-entrance — Groom from Door / Bride from Stairs',
+        nameEn: 'Re-entrance — Groom from Door / Bride from Stairs',
+        nameJa: '再入場（新郎：ドア / 新婦：階段） 🎭',
+        nameMy: 'ပြန်ဝင်ရောက်（သတို့သား：တံခါး / သတို့သမီး：ကြေးနန်း）',
+        duration: 5,
+        isOptional: false,
+        isImportant: true,
+        onStage: true,
+        responsible: 'Couple',
+        bgm: 'Re-entrance BGM',
+        coordinationNotes: 'MC countdown. Groom enters from 1F door. Bride descends from stairs. Groom meets bride at staircase base → walk to stage together.',
+        coordinationNotesJa: 'MC→カウントダウン。新郎が1Fドアより先に入場し、階段の下で新婦を待つ。新婦が階段を降りてくる（降壇）→ お二人でステージへ。',
+        staffNotes: {
+          mc: 'Countdown to cue both entrances simultaneously.',
+          photo: 'Staircase base: capture bride descent + groom waiting + first look reaction.',
+          lighting: 'Spotlight on staircase. Bright as bride descends.',
+          escort: 'Position groom at 1F door. Confirm bride is ready at top of stairs before MC countdown.',
+        },
+      },
+      {
+        id: 'dl9',
+        name: 'Bouquet Present to Friend',
+        nameEn: 'Bouquet Present to Friend',
+        nameJa: 'ブーケプレゼント（特定の方へ）',
+        nameMy: 'Bouquet ပေးအပ်ခြင်း（သူငယ်ချင်းတစ်ဦးသို့）',
+        duration: 5,
+        isOptional: true,
+        responsible: 'Bride',
+        coordinationNotes: 'Bride presents bouquet directly to a chosen friend (no random toss). Confirm recipient with couple in advance.',
+        coordinationNotesJa: '新婦が事前に決めた友人1名にブーケを直接プレゼント（ランダムトスなし）。事前にお二人より受け取る方の名前を確認。',
+        staffNotes: {
+          escort: 'Quietly confirm the chosen recipient name with couple before this moment.',
+        },
+      },
+    ],
+  },
 ];

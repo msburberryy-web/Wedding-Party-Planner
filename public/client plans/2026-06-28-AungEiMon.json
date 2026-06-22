@@ -1,0 +1,383 @@
+{
+  "metadata": {
+    "date": "2026-06-28",
+    "venue": "Batur",
+    "groomName": "Aung Myo Tun",
+    "groomNickname": "Aung",
+    "brideName": "Ei Mon Aung",
+    "brideNickname": "EiMon",
+    "guestCount": 66,
+    "staffName": "May",
+    "mcName": "Ko Ye",
+    "photographers": {
+      "postHairMakeup": true,
+      "commemorative": "Amore Wedding Tokyo",
+      "snapshot": "Amore Wedding Tokyo",
+      "vtr": "Amore Wedding Tokyo"
+    },
+    "extras": {
+      "allergyNote": "⚠️ アレルギー確認要 — 海鮮NG×1、肉NG×4、豚肉NG×1。Batur venue に要事前確認。",
+      "venueSchedule": "9:30控室前入り → 10:30会場入り準備 → 11:00受付 → 11:30セレモニー開宴 → 12:00飲食提供開始 → 14:30お開き/退場/お見送り → 15:00お見送り終了/着替え/精算 → 15:30退出完了",
+      "champagneNote": "シャンパンタワーは検討中。ケーキは確定。",
+      "ceremonyParticipants": "ပန်းကြဲ - မလွင်လွင်ဦး ｜ ပန်ကုံး - မရွှန်းမြတ်ချယ် ｜ လက်စွပ် - မခိုင်သန့်ဇင်"
+    }
+  },
+  "language": "ja",
+  "startTime": "11:30",
+  "totalTime": 180,
+  "activities": [
+    {
+      "id": "prep-dressing",
+      "name": "Dressing Room / Rehearsal",
+      "nameJa": "控室入り・お支度・リハーサル",
+      "duration": 90,
+      "location": "控室",
+      "coordinationNotes": "9:30 Couple arrives at Batur dressing room. Hair, makeup, outfit preparation. Rehearsal from 9:00 if needed. Photo team on standby for post hair-makeup shots.",
+      "coordinationNotesJa": "9:30 お二人様控室へのご案内。ヘアメイク・お支度。リハーサルは必要に応じて実施。ヘアメイク後のポストショット撮影あり。",
+      "isPrep": true,
+      "staffNotes": {
+        "photo": "ヘアメイク後、控室にてポストショット撮影。"
+      }
+    },
+    {
+      "id": "prep-setup",
+      "name": "Venue Entry / Setup Check",
+      "nameJa": "会場入り・準備確認",
+      "duration": 20,
+      "location": "会場内",
+      "coordinationNotes": "10:30 Enter venue. Verify table setup, flowers, AV/BGM system, seating chart. Coordinate food service timing with venue.",
+      "coordinationNotesJa": "10:30 会場入り。テーブルセッティング・フラワー・AV/BGMシステム確認。会場様と食事提供タイミングを事前確認。",
+      "isPrep": true
+    },
+    {
+      "id": "prep-rehearsal",
+      "name": "Ceremony Rehearsal",
+      "nameJa": "リハーサル実施",
+      "duration": 10,
+      "location": "会場内",
+      "coordinationNotes": "10:50 Final ceremony rehearsal on floor. Check positions for vow, ring, flower presentation. Confirm cues with MC and photo team.",
+      "coordinationNotesJa": "10:50 最終リハーサル。誓いの言葉・指輪交換・花束贈呈の立ち位置確認。MCとフォトチームとキュー確認。",
+      "isPrep": true
+    },
+    {
+      "id": "prep-reception",
+      "name": "Guest Reception",
+      "nameJa": "ゲスト受付",
+      "duration": 25,
+      "location": "ロビー",
+      "coordinationNotes": "11:00 Guest check-in at lobby. Seating chart distribution. Photo/video team positions inside venue by 11:25.",
+      "coordinationNotesJa": "11:00 受付開始。席次表のご案内。フォト・ビデオチームは11:25までに会場内スタンバイ。",
+      "isPrep": true,
+      "staffNotes": {
+        "photo": "11:25までに会場内でスタンバイ。ゲスト着席シーンを撮影。"
+      }
+    },
+    {
+      "id": "prep-standby",
+      "name": "Entrance Standby",
+      "nameJa": "入場スタンバイ",
+      "duration": 5,
+      "location": "バックステージ",
+      "coordinationNotes": "11:25 Couple in position backstage. MC does final warm-up. BGM standby. Photo team inside venue ready.",
+      "coordinationNotesJa": "11:25 お二人バックステージにてスタンバイ。MCウォームアップ。BGMスタンバイ。",
+      "isPrep": true
+    },
+    {
+      "id": "am-1",
+      "name": "Couple Entrance",
+      "nameJa": "新郎新婦入場 🎭",
+      "duration": 5,
+      "location": "会場ドア",
+      "coordinationNotes": "11:30 Couple enters together. BGM ① cue at door. MC introduces couple. Guests applaud.",
+      "coordinationNotesJa": "11:30 お二人ご入場。BGM①のタイミングでドアオープン。MC：お二人のご紹介。ゲスト拍手でお迎え。",
+      "bgm": "入場BGM ①",
+      "bgmUrl": "https://www.youtube.com/watch?v=xvIa55sxpww",
+      "needsMic": true,
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "ドアオープンのタイミングでBGMキュー。お二人を温かくご紹介。",
+        "photo": "ドア前スタンバイ。入場の瞬間・バージンロードを歩くシーンを撮影。",
+        "lighting": "入場スポットライト。ドアからメインテーブルへ温かいライト。"
+      }
+    },
+    {
+      "id": "am-2",
+      "name": "Wedding Ceremony",
+      "nameJa": "ウェディングセレモニー 🎭",
+      "duration": 15,
+      "location": "ステージ",
+      "coordinationNotes": "11:35 Wedding ceremony. Vow exchange (Myanmar language) → Ring exchange (parents U Nan Aung + Daw War War Oo pour water) → Flower presentation. Ceremony participants: Flower scatter - Ma Lwin Lwin Oo | Bouquet - Ma Shwe Myat Chay | Ring - Ma Khine Thant Zin.",
+      "coordinationNotesJa": "11:35 ウェディングセレモニー。誓いの言葉（ミャンマー語）→ 指輪交換（ご両親 ဦးနန်းအောင် + ဒေါ်ဝါဝါဦး が水をそそぎます）→ 花束贈呈。\n参加者：ပန်းကြဲ - မလွင်လွင်ဦး ｜ ပန်ကုံး - မရွှန်းမြတ်ချယ် ｜ လက်စွပ် - မခိုင်သန့်ဇင်",
+      "needsMic": true,
+      "onStage": true,
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "各ステップをキュー：誓いの言葉 → 指輪交換 → 花束贈呈。ミャンマー語進行をサポート。",
+        "photo": "ステージ正面：誓いの言葉・指輪をはめる瞬間・花束贈呈シーンを撮影。",
+        "lighting": "セレモニー中はステージに柔らかい温かい照明。急な変化なし。"
+      },
+      "subActivities": [
+        {
+          "id": "am-2-vow",
+          "name": "Vow Exchange",
+          "nameJa": "誓いの言葉（ミャンマー語）",
+          "duration": 5,
+          "startOffset": 0
+        },
+        {
+          "id": "am-2-ring",
+          "name": "Ring Exchange + Water Pouring",
+          "nameJa": "指輪交換・水そそぎ（ご両親より）",
+          "duration": 5,
+          "startOffset": 5
+        },
+        {
+          "id": "am-2-flower",
+          "name": "Flower Presentation / Blessing",
+          "nameJa": "花束贈呈・祝福",
+          "duration": 5,
+          "startOffset": 10
+        }
+      ]
+    },
+    {
+      "id": "am-3",
+      "name": "Meal Service Start + Table Greeting",
+      "nameJa": "食事スタート・お二人テーブル挨拶回り 🎭",
+      "duration": 10,
+      "location": "各テーブル",
+      "coordinationNotes": "11:50 Food service begins. Couple visits each table to greet guests. Photographer follows. Casual atmosphere.",
+      "coordinationNotesJa": "11:50 飲食提供開始。お二人が各テーブルをラウンドしてご挨拶。カメラマン随行。和やかな雰囲気で。",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "11:50〜各テーブル挨拶シーンを随行撮影。"
+      }
+    },
+    {
+      "id": "am-4",
+      "name": "Stage Photo Time",
+      "nameJa": "ステージ写真タイム",
+      "duration": 10,
+      "location": "ステージ",
+      "coordinationNotes": "12:00 Guests come up to stage for photos with couple. MC invites guests. Free and relaxed photo time.",
+      "coordinationNotesJa": "12:00 ゲストがステージにお上がりいただき、お二人と写真撮影。MCよりご案内。自由に写真タイム。",
+      "needsMic": true,
+      "onStage": true,
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "ステージ上での2ショット・グループショットを積極的に撮影。"
+      }
+    },
+    {
+      "id": "am-5",
+      "name": "Intermission / Dress Change",
+      "nameJa": "中座（ドレスチェンジ） 🎭",
+      "duration": 10,
+      "location": "バックステージ・階段",
+      "coordinationNotes": "~12:30 Couple exits via staircase for second dress change. MC announces brief intermission. BGM ② cue.",
+      "coordinationNotesJa": "★12:30頃 中座。階段経由で控室へ。セカンドドレスへチェンジ（約10分）。MC→ゲストへ中座のアナウンス。BGM②スタート。階段にスポットライト。",
+      "bgm": "中座BGM ②",
+      "bgmUrl": "https://www.youtube.com/watch?v=QShq1KGbEOk",
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "中座アナウンス。ゲストを温かくつなぐMCトーク。",
+        "lighting": "階段スポットライト。お二人の退場シーンを照らす。"
+      }
+    },
+    {
+      "id": "am-6",
+      "name": "Slideshow Screening",
+      "nameJa": "スライドショー上映（中座中）",
+      "duration": 25,
+      "location": "会場スクリーン",
+      "coordinationNotes": "12:40 Slideshow/video screening during intermission. BGM TBD. Camera team captures guest reactions at tables.",
+      "coordinationNotesJa": "12:40 中座中にスライドショー上映。BGM未定。カメラチームはゲストリアクションをテーブルで撮影。",
+      "projector": "スライドショー映像（BGM未定）",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "上映中にゲストのリアクション・表情をテーブルで撮影。"
+      }
+    },
+    {
+      "id": "am-7",
+      "name": "Re-entrance (Second Dress)",
+      "nameJa": "再入場（セカンドドレス） 🎭",
+      "duration": 5,
+      "location": "階段",
+      "coordinationNotes": "13:05 Couple re-enters from staircase in second dress. BGM ③ cue on descent.",
+      "coordinationNotesJa": "★13:05頃 階段よりセカンドドレスで再入場。BGM③のタイミングでご入場。",
+      "bgm": "再入場BGM ③",
+      "bgmUrl": "https://www.youtube.com/watch?v=61OApbJQ5XU",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "階段下にスタンバイ。降りてくる瞬間・セカンドドレスのファーストルックを撮影。",
+        "lighting": "階段スポットライト。降りてくるとともに温かい明るいライト。"
+      }
+    },
+    {
+      "id": "am-8",
+      "name": "Toast + Cross Toast",
+      "nameJa": "乾杯・クロストースト 🎤 🎭",
+      "duration": 10,
+      "location": "メインテーブルの前",
+      "coordinationNotes": "13:10 MC leads welcome toast. Campai (~2 min). Cross toast with couple: groom drinks from bride's glass, bride from groom's. BGM cue.",
+      "coordinationNotesJa": "13:10 MCより乾杯のご発声。乾杯（約2分）。クロストースト：新郎→新婦のグラスで、新婦→新郎のグラスで乾杯。BGMあり。",
+      "bgm": "クロストーストBGM",
+      "bgmUrl": "https://www.youtube.com/watch?v=N4I57UXlBhA",
+      "needsMic": true,
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "乾杯のご発声 → クロストーストの説明・進行。",
+        "photo": "クロストーストの瞬間を正面からクローズアップ撮影。"
+      }
+    },
+    {
+      "id": "am-9",
+      "name": "Cake Cutting",
+      "nameJa": "ケーキ入刀 🎭",
+      "duration": 10,
+      "location": "ケーキ台",
+      "coordinationNotes": "13:20 Cake cutting → First Bite (groom small spoon / bride large spoon) → First Kiss.",
+      "coordinationNotesJa": "★13:20 ケーキを準備。ケーキ入刀 → ファーストバイト（新郎→小スプーン、新婦→大スプーン）→ ファーストキス。",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "ケーキ入刀・ファーストバイトの表情・ファーストキスを必ず撮影。",
+        "lighting": "ケーキ台にスポットライト。"
+      },
+      "subActivities": [
+        {
+          "id": "am-9-cut",
+          "name": "Cake Cutting",
+          "nameJa": "ケーキ入刀",
+          "duration": 3,
+          "startOffset": 0
+        },
+        {
+          "id": "am-9-bite",
+          "name": "First Bite",
+          "nameJa": "ファーストバイト",
+          "duration": 2,
+          "startOffset": 3
+        },
+        {
+          "id": "am-9-kiss",
+          "name": "First Kiss",
+          "nameJa": "ファーストキス",
+          "duration": 2,
+          "startOffset": 5
+        }
+      ]
+    },
+    {
+      "id": "am-10",
+      "name": "Love Speech",
+      "nameJa": "ラブスピーチ（お互いに） 🎤",
+      "duration": 5,
+      "location": "メインテーブル",
+      "coordinationNotes": "13:30 Couple exchanges love speeches to each other at main table. Short and heartfelt. MC introduces.",
+      "coordinationNotesJa": "13:30 お二人がお互いへのラブスピーチ。メインテーブルにて。短く心温まるメッセージ。MCがご紹介。",
+      "needsMic": true,
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "ラブスピーチのご紹介。お二人が話し終わったら温かい拍手を促す。"
+      }
+    },
+    {
+      "id": "am-11",
+      "name": "MC Game — Lucky Draw",
+      "nameJa": "ゲーム（抽選：引き出物番号） 🎤",
+      "duration": 15,
+      "location": "会場・メインテーブル",
+      "coordinationNotes": "13:35 Lucky draw game using wedding gift bag numbers. MC announces winning numbers. Winners come forward for gifts + photo with couple.",
+      "coordinationNotesJa": "★13:35 引き出物の袋番号による抽選ゲーム。MCが当選番号を発表。当選者がメインテーブルに来てギフト受け取り＋お二人と写真。",
+      "needsMic": true,
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "引き出物番号の抽選。当選番号を盛り上げて発表。当選者との写真タイムを設ける。",
+        "photo": "当選者がお二人と一緒に写真を撮るシーンを撮影。"
+      }
+    },
+    {
+      "id": "am-12",
+      "name": "Table Round Photography",
+      "nameJa": "テーブルラウンド撮影 🎭",
+      "duration": 20,
+      "location": "各テーブル",
+      "coordinationNotes": "13:50 Couple visits each table for photos with guests. Photographer follows. BGM ④ plays during round.",
+      "coordinationNotesJa": "13:50 お二人が各テーブルを訪問し写真撮影。カメラマン随行。BGM④をBGMとして流す。テーブル約7卓。",
+      "bgm": "テーブルラウンドBGM ④",
+      "bgmUrl": "https://www.youtube.com/watch?v=fWNaR-rxAic",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "各テーブルでお二人とゲストのグループ写真。全テーブルをカバー。"
+      }
+    },
+    {
+      "id": "am-13",
+      "name": "Thank You Speeches",
+      "nameJa": "お二人謝辞・ご挨拶 🎤",
+      "duration": 15,
+      "location": "メインテーブルの横",
+      "coordinationNotes": "14:10 Couple delivers thank you speech in Myanmar language. Family gratitude. MC closes the event. Backing BGM plays from start of speech.",
+      "coordinationNotesJa": "★14:10 ティッシュ用意。お二人よりミャンマー語でご家族・ゲストへ感謝のご挨拶。MC閉会のご挨拶。バッキングBGMあり（読み始めに音楽をキュー）。",
+      "bgm": "謝辞バッキングBGM",
+      "needsMic": true,
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "お二人のスピーチキュー。スピーチ後、温かい閉会のご挨拶で締める。"
+      }
+    },
+    {
+      "id": "am-14",
+      "name": "Bouquet Toss",
+      "nameJa": "ブーケトス",
+      "duration": 5,
+      "location": "ステージ前",
+      "coordinationNotes": "14:15 Bride tosses bouquet to female guests gathered at front of stage.",
+      "coordinationNotesJa": "14:15 ブーケトス。女性ゲストをステージ前に集めて実施。",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "ブーケが宙を飛ぶ瞬間＋受け取った方の表情を撮影。"
+      }
+    },
+    {
+      "id": "am-15",
+      "name": "All-Guest Group Photo",
+      "nameJa": "全員集合写真",
+      "duration": 10,
+      "location": "ステージ前",
+      "coordinationNotes": "14:25 Group photo: all guests + couple + family. Photographer arranges positions.",
+      "coordinationNotesJa": "14:25 全員集合写真（ゲスト＋お二人＋ご家族）。カメラマンが配置を調整。",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "全員をステージ前に整列。列の配置を調整して撮影。"
+      }
+    },
+    {
+      "id": "am-16",
+      "name": "Couple Exit",
+      "nameJa": "新郎新婦ご退場 🎭",
+      "duration": 5,
+      "location": "2Fドア",
+      "coordinationNotes": "14:30 Couple exits through 2F door. MC announces lobby send-off to guests.",
+      "coordinationNotesJa": "14:30 お二人2Fドアよりご退場。MC→ゲストへロビーでのお見送りをアナウンス。",
+      "isPrep": false,
+      "staffNotes": {
+        "mc": "退場アナウンス。ロビーへのゲスト誘導を案内。"
+      }
+    },
+    {
+      "id": "am-17",
+      "name": "Lobby Send-off & Petit Gifts",
+      "nameJa": "ロビー送賓・プチギフト",
+      "duration": 25,
+      "location": "ロビー",
+      "coordinationNotes": "Couple stands at lobby entrance to farewell each guest. Petit gift + wedding gift handed to each. Photographer captures farewell moments. 15:00 send-off complete.",
+      "coordinationNotesJa": "★引出物の準備。お二人ロビー入口に立ち、退場するゲスト一人ひとりにプチギフト＋引出物を手渡し。カメラマンがお別れシーンを撮影。15:00 お見送り終了予定。",
+      "isPrep": false,
+      "staffNotes": {
+        "photo": "ロビー出口でのお別れシーン・感動的な瞬間を撮影。"
+      }
+    }
+  ]
+}
