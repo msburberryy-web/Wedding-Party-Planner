@@ -6,3 +6,4 @@ coverage/
 *.log
 .env*
 !.env.example
+Wedding_Plan_*.xlsx
