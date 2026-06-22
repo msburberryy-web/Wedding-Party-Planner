@@ -23,10 +23,13 @@ export interface TimelineActivity {
   coordinationNotes?: string;
   coordinationNotesJa?: string;
   coordinationNotesMy?: string;
+  bgmUrl?: string;
+  projector?: string;
   staffNotes?: {
     mc?: string;
     photo?: string;
     lighting?: string;
+    escort?: string;
   };
   isPrep?: boolean;
   startOffset?: number;
@@ -303,6 +306,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
         const circledNumber = bgmCounter <= 20 ? String.fromCharCode(0x2460 + bgmCounter - 1) : `(${bgmCounter})`;
         bgmText = `${circledNumber} ${act.bgm}`;
     }
+    if (act.bgmUrl) bgmText = bgmText ? `${bgmText}\n${act.bgmUrl}` : act.bgmUrl;
     bgmCell.value = bgmText;
     bgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
     bgmCell.alignment = { vertical: 'middle', wrapText: true };
@@ -314,6 +318,8 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     if (act.staffNotes?.mc)       staffLines.push(`🎤 ${act.staffNotes.mc}`);
     if (act.staffNotes?.photo)    staffLines.push(`📸 ${act.staffNotes.photo}`);
     if (act.staffNotes?.lighting) staffLines.push(`💡 ${act.staffNotes.lighting}`);
+    if (act.staffNotes?.escort)   staffLines.push(`🧭 ${act.staffNotes.escort}`);
+    if (act.projector)            staffLines.push(`📽 ${act.projector}`);
     staffCell.value = staffLines.join('\n');
     staffCell.font = { name: 'MS P Mincho', size: 9 };
     staffCell.alignment = { vertical: 'top', wrapText: true };
