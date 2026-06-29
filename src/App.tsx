@@ -29,7 +29,7 @@ export default function App() {
   const [language, setLanguage] = useState<Language>('en');
   const t = translations[language];
 
-  const [startTime, setStartTime] = useState('18:00');
+  const [startTime, setStartTime] = useState('12:00');
   const [totalTime, setTotalTime] = useState(150); // 2.5 hours = 150 mins
   const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
   
