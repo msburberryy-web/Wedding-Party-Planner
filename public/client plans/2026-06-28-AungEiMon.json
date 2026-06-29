@@ -104,39 +104,46 @@
       "id": "am-2",
       "name": "Wedding Ceremony",
       "nameJa": "ウェディングセレモニー 🎭",
-      "duration": 15,
+      "duration": 27,
       "location": "ステージ",
-      "coordinationNotes": "11:35 Wedding ceremony. Vow exchange (Myanmar language) → Ring exchange (parents U Nan Aung + Daw War War Oo pour water) → Flower presentation. Ceremony participants: Flower scatter - Ma Lwin Lwin Oo | Bouquet - Ma Shwe Myat Chay | Ring - Ma Khine Thant Zin.",
-      "coordinationNotesJa": "11:35 ウェディングセレモニー。誓いの言葉（ミャンマー語）→ 指輪交換（ご両親 ဦးနန်းအောင် + ဒေါ်ဝါဝါဦး が水をそそぎます）→ 花束贈呈。\n参加者：ပန်းကြဲ - မလွင်လွင်ဦး ｜ ပန်ကုံး - မရွှန်းမြတ်ချယ် ｜ လက်စွပ် - မခိုင်သန့်ဇင်",
+      "coordinationNotes": "11:35 Wedding ceremony (~27 min). Vow exchange with family present (7 min) → Ring exchange with Ma Khine Thant Zin (7 min) → Burmese water pouring blessing by parents U Nan Aung + Daw War War Oo (10 min) → Flower presentation: scatter by Ma Lwin Lwin Oo, bouquet by Ma Shwe Myat Chay (3 min).",
+      "coordinationNotesJa": "11:35 ウェディングセレモニー（約27分）。誓いの言葉（ミャンマー語・ご家族参加：7分）→ 指輪交換・မခိုင်သန့်ဇင်（7分）→ ရေစင်လောင်း 水そそぎ・ご両親 ဦးနန်းအောင် + ဒေါ်ဝါဝါဦး（10分）→ 花束贈呈：ပန်းကြဲ မလွင်လွင်ဦး ／ ပန်ကုံး မရွှန်းမြတ်ချယ်（3分）。",
       "needsMic": true,
       "onStage": true,
       "isPrep": false,
       "staffNotes": {
-        "mc": "各ステップをキュー：誓いの言葉 → 指輪交換 → 花束贈呈。ミャンマー語進行をサポート。",
-        "photo": "ステージ正面：誓いの言葉・指輪をはめる瞬間・花束贈呈シーンを撮影。",
+        "mc": "各ステップをキュー：誓いの言葉 → 指輪交換 → ရေစင်လောင်း（水そそぎ）→ 花束贈呈。ミャンマー語進行をサポート。",
+        "photo": "ステージ正面：誓いの言葉・指輪をはめる瞬間・水そそぎのご両親・花束贈呈シーンを撮影。",
         "lighting": "セレモニー中はステージに柔らかい温かい照明。急な変化なし。"
       },
       "subActivities": [
         {
           "id": "am-2-vow",
-          "name": "Vow Exchange",
-          "nameJa": "誓いの言葉（ミャンマー語）",
-          "duration": 5,
+          "name": "Vow Exchange (with family)",
+          "nameJa": "誓いの言葉（ミャンマー語・ご家族参加）",
+          "duration": 7,
           "startOffset": 0
         },
         {
           "id": "am-2-ring",
-          "name": "Ring Exchange + Water Pouring",
-          "nameJa": "指輪交換・水そそぎ（ご両親より）",
-          "duration": 5,
-          "startOffset": 5
+          "name": "Ring Exchange",
+          "nameJa": "指輪交換（မခိုင်သန့်ဇင်）",
+          "duration": 7,
+          "startOffset": 7
+        },
+        {
+          "id": "am-2-water",
+          "name": "Water Pouring Blessing (Burmese)",
+          "nameJa": "ရေစင်လောင်း 水そそぎ（ご両親より）",
+          "duration": 10,
+          "startOffset": 14
         },
         {
           "id": "am-2-flower",
-          "name": "Flower Presentation / Blessing",
-          "nameJa": "花束贈呈・祝福",
-          "duration": 5,
-          "startOffset": 10
+          "name": "Flower Presentation",
+          "nameJa": "花束贈呈（မလွင်လွင်ဦး ／ မရွှန်းမြတ်ချယ်）",
+          "duration": 3,
+          "startOffset": 24
         }
       ]
     },
