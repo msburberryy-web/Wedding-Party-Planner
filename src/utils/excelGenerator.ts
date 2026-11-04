@@ -1,4 +1,4 @@
-import type { Activity } from '../constants/activities';
+import { DEFAULT_MUSIC, type Activity } from '../constants/activities';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ export interface TimelineActivity {
   nameJa?: string;
   nameMy?: string;
   duration: number;
+  reviewStatus?: Activity['reviewStatus'];
   location?: string;
   style?: string;
   details?: string;
@@ -68,6 +69,11 @@ function getStaffLines(activity: TimelineActivity, language?: string): string[] 
     lines.push(`${language === 'ja' ? '映像' : 'Projector'}：${activity.projector}`);
   }
   return lines;
+}
+
+function reviewLabel(activity: TimelineActivity, language?: string): string {
+  if (activity.reviewStatus === 'confirmed') return language === 'ja' ? '確認済み' : 'Confirmed';
+  return language === 'ja' ? '要確認' : 'Need review';
 }
 
 export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: TimelineActivity[], language?: string) => {
@@ -308,15 +314,15 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     const parts = [];
     if (act.style) parts.push(`【${act.style}】`);
     if (resolvedNotes || act.details) parts.push(resolvedNotes || act.details!);
-    contentCell.value = parts.join(' ') || null;
+    contentCell.value = [reviewLabel(act, language), parts.join(' ')].filter(Boolean).join('\n');
     contentCell.alignment = { vertical: 'middle', wrapText: true };
     contentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
     // BGM (H:I)
     sheet.mergeCells(`H${currentRow}:I${currentRow}`);
     const bgmCell = row.getCell(8);
-    let bgmText = '';
-    if (act.bgm) {
+    let bgmText = DEFAULT_MUSIC;
+    if (act.bgm?.trim()) {
         bgmCounter++;
         // Use circled numbers for 1-20, fallback to (N) for >20
         const circledNumber = bgmCounter <= 20 ? String.fromCharCode(0x2460 + bgmCounter - 1) : `(${bgmCounter})`;
@@ -380,15 +386,15 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             const subParts = [];
             if (sub.style) subParts.push(`【${sub.style}】`);
             if (resolvedSubNotes || sub.details) subParts.push(resolvedSubNotes || sub.details!);
-            subContentCell.value = subParts.join(' ') || null;
+            subContentCell.value = [reviewLabel(sub, language), subParts.join(' ')].filter(Boolean).join('\n');
             subContentCell.alignment = { vertical: 'middle', wrapText: true };
             subContentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
             // BGM
             sheet.mergeCells(`H${currentRow}:I${currentRow}`);
             const subBgmCell = subRow.getCell(8);
-            let subBgmText = '';
-            if (sub.bgm) {
+            let subBgmText = DEFAULT_MUSIC;
+            if (sub.bgm?.trim()) {
                 bgmCounter++;
                 const circledNumber = bgmCounter <= 20 ? String.fromCharCode(0x2460 + bgmCounter - 1) : `(${bgmCounter})`;
                 subBgmText = `${circledNumber} ${sub.bgm}`;

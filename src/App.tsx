@@ -429,7 +429,7 @@ export default function App() {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -487,25 +487,25 @@ export default function App() {
     <div className="min-h-screen bg-wedding-stone text-wedding-ink font-sans">
       {/* Header */}
       <header className="bg-white/70 backdrop-blur-lg border-b border-stone-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch gap-2 py-3 md:min-h-24 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <Heart className="w-5 h-5 text-wedding-gold fill-wedding-gold" />
-              <h1 className="text-3xl font-serif font-bold tracking-tight text-wedding-olive">{t.title}</h1>
+              <h1 className="min-w-0 break-words text-xl sm:text-3xl font-serif font-bold tracking-tight text-wedding-olive">{t.title}</h1>
               <div className="h-4 w-px bg-stone-200 mx-2 hidden sm:block" />
               <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest hidden sm:block">By Amore Wedding Tokyo</span>
             </div>
             {metadata.groomName && metadata.brideName && (
-              <p className="text-xs text-stone-400 uppercase tracking-widest mt-1 ml-7 font-medium">
+              <p className="text-xs text-stone-400 uppercase tracking-widest mt-1 ml-7 font-medium [overflow-wrap:anywhere]">
                 {metadata.groomName} & {metadata.brideName}
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 md:justify-end md:gap-4">
             {/* Language & Stats */}
-            <div className="hidden md:flex items-center gap-6 mr-4">
-              <div className="flex items-center gap-2 bg-stone-100 rounded-full px-4 py-1.5">
+            <div className="flex items-center gap-2 md:gap-6 md:mr-4">
+              <div className="flex items-center gap-1 bg-stone-100 rounded-full px-2 md:px-4 py-1.5">
                 <Globe className="w-4 h-4 text-stone-400" />
                 <select 
                   value={language} 
@@ -518,7 +518,7 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="flex items-center gap-3 text-xs font-mono">
+              <div className="hidden md:flex items-center gap-3 text-xs font-mono">
                 <div className="flex flex-col items-end">
                   <span className="text-[10px] text-stone-400 uppercase tracking-tighter">{t.used}</span>
                   <span className={`font-bold ${usedTime > totalTime ? 'text-red-500' : 'text-wedding-olive'}`}>{usedTime}m</span>
@@ -558,7 +558,7 @@ export default function App() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-wedding-olive text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-3 sm:px-6 py-2.5 bg-wedding-olive text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>{isSaving ? 'Saving...' : 'Save'}</span>
@@ -567,7 +567,7 @@ export default function App() {
               <button
                 onClick={handleExport}
                 disabled={selectedActivities.length === 0}
-                className="flex items-center gap-2 px-6 py-2.5 bg-wedding-gold text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-3 sm:px-6 py-2.5 bg-wedding-gold text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
                 <span>Excel</span>
@@ -581,10 +581,10 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
           {/* Left Sidebar - Configuration & Available Activities */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="min-w-0 lg:col-span-4 space-y-8">
             
             {/* Settings Card */}
-            <div className="glass-card rounded-[2rem] p-8">
+            <div className="glass-card rounded-[2rem] p-4 sm:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-wedding-olive/10 rounded-lg">
                   <Settings className="w-5 h-5 text-wedding-olive" />
@@ -870,7 +870,7 @@ export default function App() {
             </div>
 
             {/* Activity Library Card */}
-            <div className="glass-card rounded-[2rem] p-8">
+            <div className="glass-card rounded-[2rem] p-4 sm:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-wedding-olive/10 rounded-lg">
                   <Plus className="w-5 h-5 text-wedding-olive" />
@@ -883,7 +883,7 @@ export default function App() {
             </div>
 
             {/* Add Custom Activity Card */}
-            <div className="glass-card rounded-[2rem] p-8">
+            <div className="glass-card rounded-[2rem] p-4 sm:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-wedding-olive/10 rounded-lg">
                   <Plus className="w-5 h-5 text-wedding-olive" />
@@ -896,7 +896,7 @@ export default function App() {
                   placeholder="Activity name..."
                   value={customActivity.name}
                   onChange={(e) => setCustomActivity({ ...customActivity, name: e.target.value })}
-                  className="flex-1 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
+                  className="min-w-0 flex-1 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                 />
                 <div className="relative w-24">
                   <input
@@ -920,9 +920,9 @@ export default function App() {
           </div>
 
           {/* Right Main Area - Timeline */}
-          <div className="lg:col-span-8">
+          <div className="min-w-0 lg:col-span-8">
             <div className="glass-card rounded-[2.5rem] overflow-hidden min-h-[600px] flex flex-col">
-              <div className="px-8 py-6 border-b border-stone-100 bg-white/30 backdrop-blur-sm flex items-center justify-between">
+              <div className="px-4 sm:px-8 py-4 sm:py-6 gap-2 flex-wrap border-b border-stone-100 bg-white/30 backdrop-blur-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-wedding-olive text-white rounded-lg shadow-sm">
                     <Calendar className="w-5 h-5" />
@@ -953,7 +953,7 @@ export default function App() {
                     </motion.div>
                     <h3 className="font-serif text-3xl text-wedding-ink mb-4">Your timeline is a blank canvas</h3>
                     <p className="text-stone-400 max-w-sm mx-auto leading-relaxed">
-                      Every great wedding starts with a plan. Add activities from the library or use our AI generator to begin your journey.
+                      Every great wedding starts with a plan. Add activities from the library or load the reception template to begin your journey.
                     </p>
                   </div>
                 ) : (

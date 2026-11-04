@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers, GripVertical, ChevronDown } from 'lucide-react';
+import { DEFAULT_MUSIC } from '../constants/activities';
 import { TimelineActivity } from '../utils/excelGenerator';
 import { Language, translations } from '../constants/translations';
 import { useSortable } from '@dnd-kit/sortable';
@@ -47,6 +48,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging
@@ -75,23 +77,26 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative pl-12 pr-4 py-6 group transition-all ${
+      className={`relative min-w-0 pl-12 pr-2 sm:pr-4 py-4 group [overflow-wrap:anywhere] ${
         activity.isImportant ? 'bg-wedding-olive/5' : 'hover:bg-white/50'
       } ${isDragging ? 'shadow-2xl ring-2 ring-wedding-olive/20 rounded-2xl bg-white' : ''}`}
     >
       {/* Drag Handle */}
-      <div 
-        {...attributes} 
+      <button
+        ref={setActivatorNodeRef}
+        type="button"
+        {...attributes}
         {...listeners}
-        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-stone-300 hover:text-stone-500 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label={language === 'ja' ? 'ドラッグして並べ替え' : 'Drag to reorder'}
+        className="absolute z-10 left-0 top-3 grid h-11 w-11 touch-none select-none place-items-center rounded-lg text-stone-600 hover:bg-stone-100 cursor-grab active:cursor-grabbing"
       >
         <GripVertical className="w-5 h-5" />
-      </div>
+      </button>
       {/* Timeline Connector */}
-      <div className="timeline-line" />
-      <div className={`timeline-dot ${activity.isImportant ? 'scale-150 ring-4 ring-wedding-olive/20' : ''}`} />
+      <div className="timeline-line pointer-events-none hidden md:block" />
+      <div className={`timeline-dot pointer-events-none hidden md:block ${activity.isImportant ? 'scale-150 ring-4 ring-wedding-olive/20' : ''}`} />
 
-      <div className="flex flex-col md:flex-row md:items-start gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-start gap-3">
         {/* Time and Duration */}
         <div className="flex flex-col min-w-[100px]">
           {isEditingStartTime ? (
@@ -131,7 +136,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           {activity.durationOptions && (
             <select
               aria-label={language === 'ja' ? 'お色直しの時間' : 'Outfit change duration'}
@@ -145,7 +150,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
               ))}
             </select>
           )}
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 mb-1">
             {isEditingName ? (
               <input
                 autoFocus
@@ -224,7 +229,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                   value={currentNotes || ''}
                   onBlur={() => setIsEditingNotes(false)}
                   onChange={(e) => onUpdateActivity?.(activity.id, { [notesUpdateField]: e.target.value })}
-                  className="flex-1 text-xs bg-white border border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive resize-none"
+                  className="min-w-0 flex-1 text-xs bg-white border border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive resize-none"
                   rows={2}
                 />
               ) : (
@@ -238,6 +243,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             </div>
           </div>
 
+          <ActivityFields activity={activity} language={language}
+            update={(field, value) => onUpdateActivity?.(activity.id, { [field]: value })} />
+
           {/* Sub Activities */}
           {activity.subActivities && activity.subActivities.length > 0 && (
             <div className="mt-4 space-y-2 pl-4 border-l-2 border-wedding-gold/30">
@@ -247,11 +255,12 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                 </p>
               )}
               {activity.subActivities.map((sub) => (
-                <div key={sub.id} className="text-sm text-stone-600 flex items-center justify-between group/sub hover:bg-stone-50 p-1 rounded-lg transition-colors">
-                  <div className="flex items-center gap-2 flex-1">
+                <div key={sub.id} className="min-w-0">
+                <div className="text-sm text-stone-600 flex items-center justify-between group/sub hover:bg-stone-50 p-1 rounded-lg transition-colors">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-wedding-gold" />
                     {editingSubId === sub.id ? (
-                      <div className="flex items-center gap-2 flex-1">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
                         <input
                           autoFocus
                           type="text"
@@ -266,7 +275,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                             type="number"
                             value={sub.duration}
                             onChange={(e) => onUpdateSubActivity?.(activity.id, sub.id, 'duration', Number(e.target.value))}
-                            className="w-12 text-xs font-mono bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive"
+                            className="w-12 shrink-0 text-xs font-mono bg-white border-wedding-olive/30 rounded px-1 focus:ring-wedding-olive focus:border-wedding-olive"
                           />
                           <span className="text-[10px] text-stone-400">m</span>
                         </div>
@@ -290,6 +299,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
+                </div>
+                <ActivityFields activity={sub} language={language}
+                  update={(field, value) => onUpdateSubActivity?.(activity.id, sub.id, field, value)} />
                 </div>
               ))}
             </div>
@@ -360,7 +372,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 flex-wrap">
           <button
             onClick={() => onMove(index, 'up')}
             className="p-2 text-stone-400 hover:text-wedding-olive hover:bg-white rounded-full transition-colors"
@@ -396,5 +408,32 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     </div>
   );
 };
+
+function ActivityFields({ activity, language, update }: {
+  activity: TimelineActivity;
+  language: Language;
+  update: (field: 'reviewStatus' | 'bgm', value: string) => void;
+}) {
+  const needsReview = activity.reviewStatus !== 'confirmed';
+  return (
+    <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-2">
+      <label className="grid min-w-0 gap-1 text-xs text-stone-600">
+        {language === 'ja' ? '確認状況' : 'Review status'}
+        <select value={needsReview ? 'needs-review' : 'confirmed'}
+          onChange={event => update('reviewStatus', event.target.value)}
+          className={`w-full min-w-0 rounded-lg border px-2 py-1.5 text-base ${needsReview ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-stone-200 bg-white'}`}>
+          <option value="needs-review">{language === 'ja' ? '要確認' : 'Need review'}</option>
+          <option value="confirmed">{language === 'ja' ? '確認済み' : 'Confirmed'}</option>
+        </select>
+      </label>
+      <label className="grid min-w-0 gap-1 text-xs text-stone-600">
+        {language === 'ja' ? '音楽（BGM）' : 'Music (BGM)'}
+        <input type="text" value={activity.bgm ?? ''} placeholder={DEFAULT_MUSIC}
+          onChange={event => update('bgm', event.target.value)}
+          className="w-full min-w-0 rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-base" />
+      </label>
+    </div>
+  );
+}
 
 export default TimelineItem;
