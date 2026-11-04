@@ -40,7 +40,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/checkout@v4
         with:
-          ref: 877481178401eece22766be22c2de7065b297714
+          ref: b447989a7df3a8e893a64b1ad13fd0807319f26f
           path: .preview-source
           persist-credentials: false
       - name: Build planner preview
