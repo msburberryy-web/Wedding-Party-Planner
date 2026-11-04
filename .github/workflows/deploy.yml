@@ -36,6 +36,27 @@ jobs:
           GEMINI_API_KEY: ""
           GITHUB_PAGES: "true"
 
+      - name: Check out planner preview
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/checkout@v4
+        with:
+          ref: cdf54a7f6689c2e879ec0d17ba39f47cca132936
+          path: .preview-source
+          persist-credentials: false
+      - name: Build planner preview
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: .preview-source
+        env:
+          GEMINI_API_KEY: ""
+          GITHUB_PAGES: "false"
+        run: |
+          npm ci
+          npm run build
+          mkdir -p ../dist/preview
+          cp dist/index.html ../dist/preview/
+          cp -R dist/assets ../dist/preview/
+          git rev-parse HEAD > ../dist/preview/revision.txt
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
