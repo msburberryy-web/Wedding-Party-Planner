@@ -32,14 +32,14 @@ export function createReceptionTemplate(): Activity[] {
       planner: '入場口・各担当の準備確認',
     }),
     program('entrance', 'Couple entrance', '新郎新婦入場', 5, {
-      escort: '扉前待機→合図で開扉→メイン席へ',
-      photo: '入場口・正面から撮影／通路確保',
-      lighting: '入場口→メイン席にスポット',
-      sound: '開扉合図で入場曲→着席後フェード',
+      escort: '合図に合わせて入場・着席を案内',
+      photo: '入場撮影／通路確保',
+      lighting: '入場時の照明',
+      sound: '入場曲・音量調整',
     }),
     program('welcome', 'Welcome speech', 'ウェルカムスピーチ', 5, {
       mc: '新郎新婦紹介→あいさつ',
-      sound: '新郎新婦へマイク／BGM音量↓',
+      sound: '新郎新婦へマイク／BGM調整',
     }),
     program('toast', 'Toast', '乾杯', 5, {
       mc: '乾杯担当紹介／グラス案内',
@@ -77,7 +77,7 @@ export function createReceptionTemplate(): Activity[] {
       subActivities: [
         program('film', 'Profile film during outfit change', 'プロフィール映像上映', 7, {
           sound: '映像音声↑→終了後は歓談BGM',
-          lighting: '上映中は客席を暗く→終了後に復帰',
+          lighting: '上映に合わせて照明調整',
         }, { startOffset: 0, projector: '司会合図で再生／再生不可は進行へ連絡' }),
       ],
       coordinationNotesJa: '上映→食事・歓談（上映はお色直し時間内）',
@@ -86,17 +86,17 @@ export function createReceptionTemplate(): Activity[] {
       planner: '新郎新婦・司会・撮影・音響・照明確認→合図',
       escort: '再入場口で衣装・動線確認',
       photo: '新衣装・ゲストの反応を撮影',
-      lighting: '開扉で新郎新婦を照らす',
+      lighting: '再入場時の照明',
       sound: '合図で再入場曲',
     }),
     program('tables', 'Table visits and photos', 'テーブルラウンド・撮影', 15, {
       escort: '順に各卓へ案内',
       photo: '各卓で集合写真',
-      caterer: '対象卓は撮影後に配膳',
+      caterer: '撮影に合わせて配膳調整',
     }),
     program('game', 'Guest activity', 'ゲスト参加ゲーム', 10, {
       mc: 'ルールを短く説明→時間内に結果発表',
-      planner: '景品用意／遅れたら回数を減らす',
+      planner: '景品用意／遅れに応じて内容調整',
       sound: '必要に応じマイク・効果音',
     }, { isOptional: true }),
     program('buffer', 'Conversation and buffer', '歓談・予備時間', 5, {
@@ -104,7 +104,7 @@ export function createReceptionTemplate(): Activity[] {
     }),
     program('thanks', 'Couple thank-you speech', '新郎新婦の謝辞', 5, {
       mc: '新郎新婦の謝辞を案内',
-      sound: 'マイク用意／話し始めでBGM音量↓',
+      sound: 'マイク・BGM音量調整',
       photo: '新郎新婦・ゲストの表情を撮影',
     }),
     program('group', 'Group photo', '全員集合写真', 10, {

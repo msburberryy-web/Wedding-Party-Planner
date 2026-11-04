@@ -84,6 +84,10 @@ export async function importWeddingExcel(buffer: ArrayBuffer) {
         explicitlyEmpty = true;
         continue;
       }
+      if (line.startsWith('準備メモ｜')) {
+        preparations.push({ item: line.slice('準備メモ｜'.length), owner: '未定', readyTime: '' });
+        continue;
+      }
       const match = /^準備｜(.+)｜([^｜]+)｜(開始前|\d{2}:\d{2})$/.exec(line);
       const owner = PREPARATION_OWNERS.find(value => value === match?.[2]);
       if (match && owner) preparations.push({ item: match[1], owner, readyTime: match[3] === '開始前' ? '' : match[3] });
