@@ -1,3 +1,4 @@
+import { PREPARATION_OWNERS, VENDOR_SECTION, type Preparation, type VendorArrival } from '../constants/programPreparation';
 import ExcelJS, { type Cell } from 'exceljs';
 import { DEFAULT_MUSIC, type Activity } from '../constants/activities';
 import type { WeddingMetadata } from './excelGenerator';
@@ -54,15 +55,44 @@ export async function importWeddingExcel(buffer: ArrayBuffer) {
     },
   };
   const rows: { activity: Activity; start?: number; end?: number; child: boolean }[] = [];
+  const vendorArrivals: VendorArrival[] = [];
+  let vendorSection = false;
   sheet.eachRow((row, index) => {
     if (index <= 8) return;
     const [name, location, content, music, staffText] = [3, 4, 5, 8, 10].map(column => textOf(row.getCell(column)));
+    if (name === VENDOR_SECTION && textOf(row.getCell(1)) === '到着時刻') {
+      vendorSection = true;
+      metadata.vendorArrivals = vendorArrivals;
+      return;
+    }
+    if (vendorSection) {
+      if (name) vendorArrivals.push({
+        role: name, name: location,
+        arrival: textOf(row.getCell(1)).replace(/^未定$/, ''),
+        ready: content.replace(/^未定$/, ''),
+      });
+      return;
+    }
     const [start, end] = timesOf(row.getCell(1));
     if (start === undefined && ![name, location, content, music, staffText].some(Boolean)) return;
     const status = content.match(/^(要確認|確認済み|Need review|Confirmed)(?:\r?\n|$)/i);
+    const notes: string[] = [];
+    const preparations: Preparation[] = [];
+    let explicitlyEmpty = false;
+    for (const line of (status ? content.slice(status[0].length) : content).split(/\r?\n/)) {
+      if (line === '準備｜なし') {
+        explicitlyEmpty = true;
+        continue;
+      }
+      const match = /^準備｜(.+)｜([^｜]+)｜(開始前|\d{2}:\d{2})$/.exec(line);
+      const owner = PREPARATION_OWNERS.find(value => value === match?.[2]);
+      if (match && owner) preparations.push({ item: match[1], owner, readyTime: match[3] === '開始前' ? '' : match[3] });
+      else notes.push(line);
+    }
     rows.push({ start, end, child: /^↳/.test(name), activity: {
       id: `sheet-${index}`, name: name.replace(/^↳\s*/, ''), duration: 0, isOptional: false,
-      location, coordinationNotesJa: status ? content.slice(status[0].length) : content,
+      location, coordinationNotesJa: notes.join('\n'),
+      ...(preparations.length || explicitlyEmpty ? { preparations } : {}),
       reviewStatus: /^(確認済み|confirmed)$/i.test(status?.[1] ?? '') ? 'confirmed' : 'needs-review',
       bgm: music === DEFAULT_MUSIC ? '' : music.replace(/^(?:[①-⑳]|\(\d+\))\s+/, ''),
       staffText, omitTime: start === undefined, showTimeRange: end !== undefined,

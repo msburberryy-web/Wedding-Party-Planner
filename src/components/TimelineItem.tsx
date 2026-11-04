@@ -1,3 +1,4 @@
+import { PreparationFields } from './PreparationFields';
 import React, { useState } from 'react';
 import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers, GripVertical, ChevronDown } from 'lucide-react';
 import { DEFAULT_MUSIC } from '../constants/activities';
@@ -320,6 +321,15 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             </button>
             {showStaffNotes && (
               <div className="mt-2 space-y-2 pl-2 border-l-2 border-stone-100">
+                <PreparationFields activity={activity} onChange={preparations => onUpdateActivity?.(activity.id, { preparations })} />
+                {activity.subActivities?.map(sub => (
+                  <div key={sub.id} className="min-w-0">
+                    <p className="mb-1 text-xs text-stone-600">{language === 'ja' ? sub.nameJa || sub.name : sub.nameEn || sub.name}</p>
+                    <PreparationFields activity={sub}
+                      onChange={preparations => onUpdateSubActivity?.(activity.id, sub.id, 'preparations', preparations)} />
+                  </div>
+                ))}
+
                 {([
                   { key: 'mc', label: '🎤 MC', color: 'bg-blue-50 border-blue-200' },
                   { key: 'photo', label: '📸 Photo/Video', color: 'bg-orange-50 border-orange-200' },

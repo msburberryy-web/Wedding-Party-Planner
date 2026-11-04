@@ -1,3 +1,4 @@
+import { VendorArrivals } from './components/VendorArrivals';
 import { useState, useMemo, useEffect, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { addMinutes, parse, format, differenceInMinutes } from 'date-fns';
@@ -914,6 +915,8 @@ export default function App() {
                 </div>
               </div>
             </div>
+
+            <VendorArrivals rows={metadata.vendorArrivals} onChange={vendorArrivals => setMetadata(current => ({ ...current, vendorArrivals }))} />
 
             {/* Activity Library Card */}
             <div className="glass-card rounded-[2rem] p-4 sm:p-8">

@@ -1,3 +1,4 @@
+import { OWNER_COLORS, VENDOR_SECTION, programPreparations, type VendorArrival } from '../constants/programPreparation';
 import { DEFAULT_MUSIC, type Activity } from '../constants/activities';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -14,6 +15,7 @@ export interface TimelineActivity {
   nameMy?: string;
   duration: number;
   reviewStatus?: Activity['reviewStatus'];
+  preparations?: Activity['preparations'];
   location?: string;
   style?: string;
   details?: string;
@@ -39,6 +41,7 @@ export interface TimelineActivity {
 }
 
 export interface WeddingMetadata {
+  vendorArrivals?: VendorArrival[];
   date: string;
   venue: string;
   groomName: string;
@@ -80,6 +83,20 @@ function getStaffLines(activity: TimelineActivity, language?: string): string[] 
 function reviewLabel(activity: TimelineActivity, language?: string): string {
   if (activity.reviewStatus === 'confirmed') return language === 'ja' ? '確認済み' : 'Confirmed';
   return language === 'ja' ? '要確認' : 'Need review';
+}
+
+function programContent(activity: TimelineActivity, notes: string, language?: string): ExcelJS.CellValue {
+  const base = [reviewLabel(activity, language), notes].filter(Boolean).join('\n');
+  const preparations = programPreparations(activity).filter(row => row.item.trim());
+  if (!preparations.length) return activity.preparations === undefined ? base : base + '\n準備｜なし';
+  return { richText: [
+    { text: base },
+    ...preparations.flatMap(({ item, owner, readyTime }) => [
+      { text: `\n準備｜${item.replace(/\s+/g, ' ').trim()}｜` },
+      { text: owner, font: { bold: true, color: { argb: OWNER_COLORS[owner] } } },
+      { text: `｜${readyTime || '開始前'}` },
+    ]),
+  ] };
 }
 
 function fitProgramRow(row: ExcelJS.Row, minimumHeight: number) {
@@ -329,7 +346,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     const parts = [];
     if (act.style) parts.push(`【${act.style}】`);
     if (resolvedNotes || act.details) parts.push(resolvedNotes || act.details!);
-    contentCell.value = [reviewLabel(act, language), parts.join(' ')].filter(Boolean).join('\n');
+    contentCell.value = programContent(act, parts.join(' '), language);
     contentCell.alignment = { vertical: 'middle', wrapText: true };
     contentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
@@ -401,7 +418,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             const subParts = [];
             if (sub.style) subParts.push(`【${sub.style}】`);
             if (resolvedSubNotes || sub.details) subParts.push(resolvedSubNotes || sub.details!);
-            subContentCell.value = [reviewLabel(sub, language), subParts.join(' ')].filter(Boolean).join('\n');
+            subContentCell.value = programContent(sub, subParts.join(' '), language);
             subContentCell.alignment = { vertical: 'middle', wrapText: true };
             subContentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
@@ -443,6 +460,31 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
       };
   });
 
+
+  const vendorRows = (metadata.vendorArrivals ?? [])
+    .filter(entry => entry.name.trim() || entry.arrival || entry.ready)
+    .sort((a, b) => (a.arrival || '99:99').localeCompare(b.arrival || '99:99'));
+  if (vendorRows.length) {
+    currentRow++;
+    const header = sheet.getRow(currentRow++);
+    header.getCell(1).value = '到着時刻';
+    header.getCell(3).value = VENDOR_SECTION;
+    header.getCell(4).value = '業者・担当者';
+    header.getCell(5).value = '準備完了時刻';
+    header.eachCell(cell => {
+      cell.font = { bold: true };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFEEEEEE' } };
+    });
+    vendorRows.forEach(entry => {
+      const row = sheet.getRow(currentRow++);
+      row.getCell(1).value = entry.arrival || '未定';
+      row.getCell(3).value = entry.role || 'その他';
+      row.getCell(4).value = entry.name;
+      row.getCell(5).value = entry.ready || '未定';
+      for (const column of [1, 3, 4, 5]) row.getCell(column).alignment = { wrapText: true, vertical: 'middle' };
+      fitProgramRow(row, 23);
+    });
+  }
 
   // Generate buffer
   const buffer = await workbook.xlsx.writeBuffer();
