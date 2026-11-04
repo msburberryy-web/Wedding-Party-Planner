@@ -563,6 +563,14 @@ export default function App() {
                 <input type="file" aria-label={language === 'ja' ? 'Excel読込' : 'Import Excel'}
                   className="sr-only" accept=".xlsx" disabled={isImportingExcel} onChange={handleImportExcel} />
               </label>
+              <a
+                href="https://wedding.wawasensei.dev/plan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-stone-200 bg-white px-2 py-2 text-xs font-medium text-wedding-olive"
+              >
+                {language === 'ja' ? '配席プランナー' : 'Vow seating planner'} ↗
+              </a>
               <input
                 type="file"
                 id="import-json"
