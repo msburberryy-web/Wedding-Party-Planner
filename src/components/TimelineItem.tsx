@@ -249,8 +249,6 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           <ActivityFields activity={activity} language={language}
             update={(field, value) => onUpdateActivity?.(activity.id, { [field]: value })} />
 
-          <PreparationFields activity={activity} onChange={preparations => onUpdateActivity?.(activity.id, { preparations })} />
-
           {/* Sub Activities */}
           {activity.subActivities && activity.subActivities.length > 0 && (
             <div className="mt-4 space-y-2 pl-4 border-l-2 border-wedding-gold/30">
@@ -307,7 +305,6 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                 </div>
                 <ActivityFields activity={sub} language={language}
                   update={(field, value) => onUpdateSubActivity?.(activity.id, sub.id, field, value)} />
-                <PreparationFields activity={sub} onChange={preparations => onUpdateSubActivity?.(activity.id, sub.id, 'preparations', preparations)} />
                 </div>
               ))}
             </div>
@@ -324,6 +321,15 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             </button>
             {showStaffNotes && (
               <div className="mt-2 space-y-2 pl-2 border-l-2 border-stone-100">
+                <PreparationFields activity={activity} onChange={preparations => onUpdateActivity?.(activity.id, { preparations })} />
+                {activity.subActivities?.map(sub => (
+                  <div key={sub.id} className="min-w-0">
+                    <p className="mb-1 text-xs text-stone-600">{language === 'ja' ? sub.nameJa || sub.name : sub.nameEn || sub.name}</p>
+                    <PreparationFields activity={sub}
+                      onChange={preparations => onUpdateSubActivity?.(activity.id, sub.id, 'preparations', preparations)} />
+                  </div>
+                ))}
+
                 {([
                   { key: 'mc', label: '🎤 MC', color: 'bg-blue-50 border-blue-200' },
                   { key: 'photo', label: '📸 Photo/Video', color: 'bg-orange-50 border-orange-200' },
