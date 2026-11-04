@@ -120,6 +120,8 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
             <Clock className="w-3 h-3" />
             <input
               type="number"
+              min={0}
+              aria-label={language === 'ja' ? '所要時間（分）' : 'Duration (minutes)'}
               value={activity.duration}
               onChange={(e) => onUpdateDuration(activity.id, Number(e.target.value))}
               className="w-10 bg-transparent border-none p-0 focus:ring-0 font-mono"
@@ -130,6 +132,19 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
 
         {/* Content */}
         <div className="flex-1">
+          {activity.durationOptions && (
+            <select
+              aria-label={language === 'ja' ? 'お色直しの時間' : 'Outfit change duration'}
+              value={activity.durationOptions.some(option => option.minutes === activity.duration) ? activity.duration : ''}
+              onChange={event => onUpdateDuration(activity.id, Number(event.target.value))}
+              className="mb-2 max-w-full rounded-lg border border-stone-200 bg-white px-2 py-1 text-sm"
+            >
+              <option value="" disabled>{language === 'ja' ? '時間を指定' : 'Custom duration'}</option>
+              {activity.durationOptions.map(option => (
+                <option key={option.minutes} value={option.minutes}>{option.label}</option>
+              ))}
+            </select>
+          )}
           <div className="flex items-center gap-2 mb-1">
             {isEditingName ? (
               <input
@@ -226,6 +241,11 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           {/* Sub Activities */}
           {activity.subActivities && activity.subActivities.length > 0 && (
             <div className="mt-4 space-y-2 pl-4 border-l-2 border-wedding-gold/30">
+              {activity.subActivities.some(sub => (sub.startOffset ?? 0) < 0 || (sub.startOffset ?? 0) + sub.duration > activity.duration) && (
+                <p role="alert" className="text-sm text-red-700">
+                  {language === 'ja' ? '同時進行の項目がこの時間枠に収まりません。' : 'A concurrent activity falls outside this time block.'}
+                </p>
+              )}
               {activity.subActivities.map((sub) => (
                 <div key={sub.id} className="text-sm text-stone-600 flex items-center justify-between group/sub hover:bg-stone-50 p-1 rounded-lg transition-colors">
                   <div className="flex items-center gap-2 flex-1">
@@ -282,20 +302,23 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
               className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-stone-400 hover:text-wedding-olive transition-colors"
             >
               <ChevronDown className={`w-3 h-3 transition-transform ${showStaffNotes ? 'rotate-180' : ''}`} />
-              Staff & Media
+              {language === 'ja' ? 'スタッフへの指示・音源・映像' : 'Staff & Media'}
             </button>
             {showStaffNotes && (
               <div className="mt-2 space-y-2 pl-2 border-l-2 border-stone-100">
-                {[
+                {([
                   { key: 'mc', label: '🎤 MC', color: 'bg-blue-50 border-blue-200' },
                   { key: 'photo', label: '📸 Photo/Video', color: 'bg-orange-50 border-orange-200' },
                   { key: 'lighting', label: '💡 Lighting', color: 'bg-yellow-50 border-yellow-200' },
                   { key: 'escort', label: '🧭 Escort', color: 'bg-green-50 border-green-200' },
-                ].map(({ key, label, color }) => (
+                  { key: 'planner', label: '進行担当', color: 'bg-stone-50 border-stone-200' },
+                  { key: 'caterer', label: '配膳担当', color: 'bg-stone-50 border-stone-200' },
+                  { key: 'sound', label: '音響担当', color: 'bg-stone-50 border-stone-200' },
+                ] as const).map(({ key, label, color }) => (
                   <div key={key} className={`rounded-lg border p-2 ${color}`}>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 mb-1">{label}</div>
                     <textarea
-                      value={(activity.staffNotes as any)?.[key] || ''}
+                      value={activity.staffNotes?.[key] || ''}
                       onChange={(e) => onUpdateActivity?.(activity.id, {
                         staffNotes: { ...activity.staffNotes, [key]: e.target.value }
                       })}

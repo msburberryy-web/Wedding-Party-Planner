@@ -5,6 +5,7 @@ export type Activity = {
   nameJa?: string;
   nameMy?: string;
   duration: number; // in minutes
+  durationOptions?: { minutes: number; label: string }[];
   isOptional: boolean;
   location?: string;
   style?: string; // e.g., 'Traditional', 'Western'
@@ -24,6 +25,9 @@ export type Activity = {
     photo?: string;
     lighting?: string;
     escort?: string;
+    planner?: string;
+    caterer?: string;
+    sound?: string;
   };
   isPrep?: boolean;
   startOffset?: number;

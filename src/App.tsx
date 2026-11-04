@@ -6,7 +6,7 @@ import { Activity, PREDEFINED_ACTIVITY_CATEGORIES } from './constants/activities
 import ActivityAccordion from './components/ActivityAccordion';
 import TimelineItem from './components/TimelineItem';
 import { generateWeddingExcel, TimelineActivity, WeddingMetadata } from './utils/excelGenerator';
-import { generateTimelineFromPrompt } from './services/geminiService';
+import { createReceptionTemplate, RECEPTION_MINUTES } from './constants/receptionTemplate';
 import { translations, Language } from './constants/translations';
 import venuesList from './constants/venues.json';
 import {
@@ -26,12 +26,12 @@ import {
 } from '@dnd-kit/sortable';
 
 export default function App() {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('ja');
   const t = translations[language];
 
   const [startTime, setStartTime] = useState('18:00');
-  const [totalTime, setTotalTime] = useState(150); // 2.5 hours = 150 mins
-  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
+  const [totalTime, setTotalTime] = useState(RECEPTION_MINUTES);
+  const [selectedActivities, setSelectedActivities] = useState<Activity[]>(() => new URLSearchParams(window.location.search).has('planId') ? [] : createReceptionTemplate());
   
   // Metadata state
   const [metadata, setMetadata] = useState<WeddingMetadata>({
@@ -53,10 +53,6 @@ export default function App() {
   });
 
   const [customActivity, setCustomActivity] = useState({ name: '', duration: 5 });
-
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
 
   // Persistence state
   const [planId, setPlanId] = useState<string | null>(null);
@@ -422,7 +418,7 @@ export default function App() {
 
   const handleUpdateDuration = (id: string, newDuration: number) => {
     setSelectedActivities(selectedActivities.map(a => 
-      a.id === id ? { ...a, duration: newDuration } : a
+      a.id === id ? { ...a, duration: Math.max(0, newDuration) } : a
     ));
   };
 
@@ -479,25 +475,12 @@ export default function App() {
     generateWeddingExcel(exportMetadata, exportTimeline, language);
   };
 
-  const handleGenerateAiTimeline = async () => {
-    setAiError(null);
-    setIsGenerating(true);
-    try {
-      const activityIds = await generateTimelineFromPrompt(aiPrompt, totalTime);
-
-      const allActivities = PREDEFINED_ACTIVITY_CATEGORIES.flatMap(c => c.activities);
-      const newActivities = activityIds
-        .map(id => allActivities.find(a => a.id === id))
-        .filter((a): a is Activity => !!a)
-        .map(a => ({ ...a, id: generateId() }));
-
-      setSelectedActivities(newActivities);
-      setAiPrompt('');
-    } catch (error: any) {
-      setAiError(error.message || 'An unknown error occurred.');
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleLoadReception = () => {
+    if (selectedActivities.length && !window.confirm(language === 'ja'
+      ? '今の進行を1.5次会の基本プランに置き換えますか？'
+      : 'Replace the current timeline with the 1.5次会 template?')) return;
+    setSelectedActivities(createReceptionTemplate());
+    setTotalTime(RECEPTION_MINUTES);
   };
 
   return (
@@ -644,26 +627,20 @@ export default function App() {
                 <div className="pt-6 border-t border-stone-100">
                   <h3 className="flex items-center gap-1.5 text-[10px] font-bold text-stone-400 mb-3 uppercase tracking-widest">
                     <Sparkles className="w-3 h-3 text-wedding-gold" />
-                    {t.autoPlan}
+                    {language === 'ja' ? '基本プラン' : 'Reception template'}
                   </h3>
-                  <textarea
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="e.g., A modern 3-hour wedding with a focus on entertainment and guest interaction."
-                    className="w-full text-sm bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive placeholder:text-stone-300"
-                    rows={3}
-                  />
+                  <p className="text-xs text-stone-600">
+                    {language === 'ja'
+                      ? '開会からお見送りまで150分。受付と会場準備は開会前です。'
+                      : '150 minutes from opening to farewell. Setup and check-in are before opening.'}
+                  </p>
                   <button
-                    onClick={handleGenerateAiTimeline}
-                    disabled={isGenerating || !aiPrompt}
-                    className="w-full mt-3 bg-wedding-olive text-white px-4 py-3 text-sm rounded-xl hover:bg-opacity-90 disabled:opacity-50 transition-all flex items-center justify-center font-medium shadow-sm"
+                    type="button"
+                    onClick={handleLoadReception}
+                    className="w-full mt-3 bg-wedding-olive text-white px-4 py-3 text-sm rounded-xl font-medium shadow-sm"
                   >
-                    {isGenerating ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    ) : <Sparkles className="w-4 h-4 mr-2" />}
-                    {isGenerating ? t.generating : t.generatePlan}
+                    {language === 'ja' ? '1.5次会の基本プランを読み込む' : 'Load 1.5次会 template'}
                   </button>
-                  {aiError && <p className="text-xs text-red-500 mt-2 text-center">{aiError}</p>}
                 </div>
 
                 <div className="pt-6 border-t border-stone-100">
@@ -952,10 +929,13 @@ export default function App() {
                   </div>
                   <h2 className="font-serif font-bold text-2xl text-wedding-olive">{t.timelineSection}</h2>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-1.5 bg-stone-100 rounded-full text-[10px] font-bold text-stone-500 uppercase tracking-widest">
+                <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-stone-100 rounded-full text-[10px] font-bold text-stone-500 uppercase tracking-widest">
                   <Sparkles className="w-3 h-3 text-wedding-gold" />
-                  {selectedActivities.length} {selectedActivities.length === 1 ? 'Activity' : 'Activities'}
+                  {language === 'ja' ? `${selectedActivities.length}項目` : `${selectedActivities.length} activities`}
                 </div>
+                <span className={`shrink-0 text-xs font-bold md:hidden ${remainingTime < 0 ? 'text-red-700' : 'text-wedding-olive'}`}>
+                  {t.remaining} {remainingTime}{language === 'ja' ? '分' : 'm'}
+                </span>
               </div>
               
               <div className="flex-1 p-4 sm:p-8">

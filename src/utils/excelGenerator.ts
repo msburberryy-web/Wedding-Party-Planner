@@ -1,3 +1,4 @@
+import type { Activity } from '../constants/activities';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
@@ -25,12 +26,7 @@ export interface TimelineActivity {
   coordinationNotesMy?: string;
   bgmUrl?: string;
   projector?: string;
-  staffNotes?: {
-    mc?: string;
-    photo?: string;
-    lighting?: string;
-    escort?: string;
-  };
+  staffNotes?: Activity['staffNotes'];
   isPrep?: boolean;
   startOffset?: number;
   subActivities?: TimelineActivity[];
@@ -52,6 +48,26 @@ export interface WeddingMetadata {
     snapshot: string;
     vtr: string;
   };
+}
+
+function getStaffLines(activity: TimelineActivity, language?: string): string[] {
+  const roles = [
+    ['mc', '司会', 'MC'],
+    ['escort', '誘導', 'Escort'],
+    ['photo', '撮影', 'Photo / video'],
+    ['planner', '進行', 'Planner'],
+    ['caterer', '配膳', 'Catering'],
+    ['lighting', '照明', 'Lighting'],
+    ['sound', '音響', 'Sound'],
+  ] as const;
+  const lines = roles.flatMap(([key, jaLabel, enLabel]) => {
+    const note = activity.staffNotes?.[key];
+    return note ? [`${language === 'ja' ? jaLabel : enLabel}：${note}`] : [];
+  });
+  if (activity.projector) {
+    lines.push(`${language === 'ja' ? '映像' : 'Projector'}：${activity.projector}`);
+  }
+  return lines;
 }
 
 export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: TimelineActivity[], language?: string) => {
@@ -314,12 +330,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
 
     // Staff Attention (J) — stacked icon lines in one cell
     const staffCell = row.getCell(10);
-    const staffLines: string[] = [];
-    if (act.staffNotes?.mc)       staffLines.push(`🎤 ${act.staffNotes.mc}`);
-    if (act.staffNotes?.photo)    staffLines.push(`📸 ${act.staffNotes.photo}`);
-    if (act.staffNotes?.lighting) staffLines.push(`💡 ${act.staffNotes.lighting}`);
-    if (act.staffNotes?.escort)   staffLines.push(`🧭 ${act.staffNotes.escort}`);
-    if (act.projector)            staffLines.push(`📽 ${act.projector}`);
+    const staffLines = getStaffLines(act, language);
     staffCell.value = staffLines.join('\n');
     staffCell.font = { name: 'MS P Mincho', size: 9 };
     staffCell.alignment = { vertical: 'top', wrapText: true };
@@ -387,8 +398,11 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             subBgmCell.alignment = { vertical: 'middle', wrapText: true };
             subBgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
-            // Empty J cell for sub-activity
             const subStaffCell = subRow.getCell(10);
+            const subStaffLines = getStaffLines(sub, language);
+            subStaffCell.value = subStaffLines.join('\n');
+            subStaffCell.alignment = { vertical: 'top', wrapText: true };
+            subRow.height = Math.max(25, subStaffLines.length * 28);
             subStaffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
 
             currentRow++;
