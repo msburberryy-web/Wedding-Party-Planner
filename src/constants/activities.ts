@@ -1,6 +1,9 @@
+import type { Preparation } from './programPreparation';
+
 export const DEFAULT_MUSIC = "Not set, お任せ";
 
 export type Activity = {
+  preparations?: Preparation[];
   reviewStatus?: "needs-review" | "confirmed";
   id: string;
   name: string;

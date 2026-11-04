@@ -1,3 +1,4 @@
+import { PreparationFields } from './PreparationFields';
 import React, { useState } from 'react';
 import { Clock, MapPin, User, Mic, Trash2, ArrowUp, ArrowDown, Star, MessageSquare, Layers, GripVertical, ChevronDown } from 'lucide-react';
 import { DEFAULT_MUSIC } from '../constants/activities';
@@ -248,6 +249,8 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
           <ActivityFields activity={activity} language={language}
             update={(field, value) => onUpdateActivity?.(activity.id, { [field]: value })} />
 
+          <PreparationFields activity={activity} onChange={preparations => onUpdateActivity?.(activity.id, { preparations })} />
+
           {/* Sub Activities */}
           {activity.subActivities && activity.subActivities.length > 0 && (
             <div className="mt-4 space-y-2 pl-4 border-l-2 border-wedding-gold/30">
@@ -304,6 +307,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
                 </div>
                 <ActivityFields activity={sub} language={language}
                   update={(field, value) => onUpdateSubActivity?.(activity.id, sub.id, field, value)} />
+                <PreparationFields activity={sub} onChange={preparations => onUpdateSubActivity?.(activity.id, sub.id, 'preparations', preparations)} />
                 </div>
               ))}
             </div>
