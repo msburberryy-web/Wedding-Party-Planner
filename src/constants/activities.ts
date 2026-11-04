@@ -1,10 +1,14 @@
+export const DEFAULT_MUSIC = "Not set, お任せ";
+
 export type Activity = {
+  reviewStatus?: "needs-review" | "confirmed";
   id: string;
   name: string;
   nameEn?: string;
   nameJa?: string;
   nameMy?: string;
   duration: number; // in minutes
+  durationOptions?: { minutes: number; label: string }[];
   isOptional: boolean;
   location?: string;
   style?: string; // e.g., 'Traditional', 'Western'
@@ -24,9 +28,16 @@ export type Activity = {
     photo?: string;
     lighting?: string;
     escort?: string;
+    planner?: string;
+    caterer?: string;
+    sound?: string;
   };
   isPrep?: boolean;
   startOffset?: number;
+  fixedStartOffset?: number;
+  omitTime?: boolean;
+  showTimeRange?: boolean;
+  staffText?: string;
   subActivities?: Activity[];
 };
 

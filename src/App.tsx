@@ -6,7 +6,7 @@ import { Activity, PREDEFINED_ACTIVITY_CATEGORIES } from './constants/activities
 import ActivityAccordion from './components/ActivityAccordion';
 import TimelineItem from './components/TimelineItem';
 import { generateWeddingExcel, TimelineActivity, WeddingMetadata } from './utils/excelGenerator';
-import { generateTimelineFromPrompt } from './services/geminiService';
+import { createReceptionTemplate, RECEPTION_MINUTES } from './constants/receptionTemplate';
 import { translations, Language } from './constants/translations';
 import venuesList from './constants/venues.json';
 import {
@@ -26,12 +26,12 @@ import {
 } from '@dnd-kit/sortable';
 
 export default function App() {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('ja');
   const t = translations[language];
 
   const [startTime, setStartTime] = useState('18:00');
-  const [totalTime, setTotalTime] = useState(150); // 2.5 hours = 150 mins
-  const [selectedActivities, setSelectedActivities] = useState<Activity[]>([]);
+  const [totalTime, setTotalTime] = useState(RECEPTION_MINUTES);
+  const [selectedActivities, setSelectedActivities] = useState<Activity[]>(() => new URLSearchParams(window.location.search).has('planId') ? [] : createReceptionTemplate());
   
   // Metadata state
   const [metadata, setMetadata] = useState<WeddingMetadata>({
@@ -53,10 +53,6 @@ export default function App() {
   });
 
   const [customActivity, setCustomActivity] = useState({ name: '', duration: 5 });
-
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
 
   // Persistence state
   const [planId, setPlanId] = useState<string | null>(null);
@@ -208,6 +204,36 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  const [isImportingExcel, setIsImportingExcel] = useState(false);
+
+  const handleImportExcel = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) return;
+    setIsImportingExcel(true);
+    try {
+      if (file.size > 10 * 1024 * 1024) throw new Error('10 MB以下のExcelファイルを選んでください。');
+      const { importWeddingExcel } = await import('./utils/excelImporter');
+      const plan = await importWeddingExcel(await file.arrayBuffer());
+      if (selectedActivities.length && !window.confirm(language === 'ja'
+        ? '現在の進行表を読み込んだExcelで置き換えますか？'
+        : 'Replace the current timeline with this Excel sheet?')) return;
+      setSelectedActivities(plan.activities);
+      setMetadata(plan.metadata);
+      setStartTime(plan.startTime);
+      setTotalTime(RECEPTION_MINUTES);
+      setPlanId(null);
+      setLastSaved(null);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('planId');
+      window.history.replaceState(null, '', url);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Excelを読み込めませんでした。');
+    } finally {
+      setIsImportingExcel(false);
+    }
+  };
+
   // Calculate timeline
   const timeline: TimelineActivity[] = useMemo(() => {
     try {
@@ -226,9 +252,9 @@ export default function App() {
       let currentMain = mainStart;
       for (let i = anchorIndex; i < selectedActivities.length; i++) {
         const act = selectedActivities[i];
-        const start = format(currentMain, 'HH:mm');
-        const actStart = currentMain;
-        currentMain = addMinutes(currentMain, act.duration);
+        const actStart = act.fixedStartOffset === undefined ? currentMain : addMinutes(mainStart, act.fixedStartOffset);
+        const start = format(actStart, 'HH:mm');
+        currentMain = addMinutes(actStart, act.duration);
         const end = format(currentMain, 'HH:mm');
 
         // Calculate Sub-activities
@@ -242,17 +268,18 @@ export default function App() {
             };
         });
 
-        calculated[i] = { ...act, startTime: start, endTime: end, subActivities };
+        calculated[i] = { ...act, startTime: start, endTime: end, endOffset: differenceInMinutes(currentMain, mainStart), subActivities };
       }
 
       // Calculate backwards from anchor
       let currentPrep = mainStart;
       for (let i = anchorIndex - 1; i >= 0; i--) {
         const act = selectedActivities[i];
-        const end = format(currentPrep, 'HH:mm');
-        currentPrep = addMinutes(currentPrep, -act.duration);
-        const start = format(currentPrep, 'HH:mm');
-        const actStart = currentPrep;
+        const actStart = act.fixedStartOffset === undefined
+          ? addMinutes(currentPrep, -act.duration) : addMinutes(mainStart, act.fixedStartOffset);
+        const end = format(addMinutes(actStart, act.duration), 'HH:mm');
+        const start = format(actStart, 'HH:mm');
+        currentPrep = actStart;
 
         // Calculate Sub-activities
         const subActivities = act.subActivities?.map(sub => {
@@ -274,10 +301,11 @@ export default function App() {
     }
   }, [startTime, selectedActivities]);
 
-  const usedTime = selectedActivities
-    .filter(a => !a.isPrep)
-    .reduce((acc, curr) => acc + curr.duration, 0);
+  const usedTime = timeline.reduce((minutes, activity) =>
+    activity.isPrep ? minutes : Math.max(minutes, activity.endOffset ?? 0), 0);
   const remainingTime = totalTime - usedTime;
+  const allActivities = selectedActivities.flatMap(activity => [activity, ...(activity.subActivities ?? [])]);
+  const reviewCount = allActivities.filter(activity => activity.reviewStatus !== 'confirmed').length;
 
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
@@ -410,6 +438,11 @@ export default function App() {
       // Calculate how many minutes from the global startTime this activity currently starts
       const currentStart = parse(timeline[actIndex].startTime, 'HH:mm', new Date());
       const globalStart = parse(startTime, 'HH:mm', new Date());
+      if (timeline[actIndex].fixedStartOffset !== undefined || timeline[actIndex].omitTime) {
+        const fixedStartOffset = differenceInMinutes(newStart, globalStart);
+        if (Number.isFinite(fixedStartOffset)) handleUpdateActivity(activityId, { fixedStartOffset, omitTime: false });
+        return;
+      }
       const offsetMinutes = differenceInMinutes(currentStart, globalStart);
       
       // The new global start time should be newStart - offsetMinutes
@@ -422,7 +455,7 @@ export default function App() {
 
   const handleUpdateDuration = (id: string, newDuration: number) => {
     setSelectedActivities(selectedActivities.map(a => 
-      a.id === id ? { ...a, duration: newDuration } : a
+      a.id === id ? { ...a, duration: Math.max(0, newDuration) } : a
     ));
   };
 
@@ -433,7 +466,7 @@ export default function App() {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -479,50 +512,37 @@ export default function App() {
     generateWeddingExcel(exportMetadata, exportTimeline, language);
   };
 
-  const handleGenerateAiTimeline = async () => {
-    setAiError(null);
-    setIsGenerating(true);
-    try {
-      const activityIds = await generateTimelineFromPrompt(aiPrompt, totalTime);
-
-      const allActivities = PREDEFINED_ACTIVITY_CATEGORIES.flatMap(c => c.activities);
-      const newActivities = activityIds
-        .map(id => allActivities.find(a => a.id === id))
-        .filter((a): a is Activity => !!a)
-        .map(a => ({ ...a, id: generateId() }));
-
-      setSelectedActivities(newActivities);
-      setAiPrompt('');
-    } catch (error: any) {
-      setAiError(error.message || 'An unknown error occurred.');
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleLoadReception = () => {
+    if (selectedActivities.length && !window.confirm(language === 'ja'
+      ? '今の進行を1.5次会の基本プランに置き換えますか？'
+      : 'Replace the current timeline with the 1.5次会 template?')) return;
+    setSelectedActivities(createReceptionTemplate());
+    setTotalTime(RECEPTION_MINUTES);
   };
 
   return (
     <div className="min-h-screen bg-wedding-stone text-wedding-ink font-sans">
       {/* Header */}
       <header className="bg-white/70 backdrop-blur-lg border-b border-stone-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-stretch gap-2 py-3 md:min-h-24 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <Heart className="w-5 h-5 text-wedding-gold fill-wedding-gold" />
-              <h1 className="text-3xl font-serif font-bold tracking-tight text-wedding-olive">{t.title}</h1>
+              <h1 className="min-w-0 break-words text-xl sm:text-3xl font-serif font-bold tracking-tight text-wedding-olive">{t.title}</h1>
               <div className="h-4 w-px bg-stone-200 mx-2 hidden sm:block" />
               <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest hidden sm:block">By Amore Wedding Tokyo</span>
             </div>
             {metadata.groomName && metadata.brideName && (
-              <p className="text-xs text-stone-400 uppercase tracking-widest mt-1 ml-7 font-medium">
+              <p className="text-xs text-stone-400 uppercase tracking-widest mt-1 ml-7 font-medium [overflow-wrap:anywhere]">
                 {metadata.groomName} & {metadata.brideName}
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 md:justify-end md:gap-4">
             {/* Language & Stats */}
-            <div className="hidden md:flex items-center gap-6 mr-4">
-              <div className="flex items-center gap-2 bg-stone-100 rounded-full px-4 py-1.5">
+            <div className="flex items-center gap-2 md:gap-6 md:mr-4">
+              <div className="flex items-center gap-1 bg-stone-100 rounded-full px-2 md:px-4 py-1.5">
                 <Globe className="w-4 h-4 text-stone-400" />
                 <select 
                   value={language} 
@@ -535,20 +555,22 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="flex items-center gap-3 text-xs font-mono">
-                <div className="flex flex-col items-end">
-                  <span className="text-[10px] text-stone-400 uppercase tracking-tighter">{t.used}</span>
-                  <span className={`font-bold ${usedTime > totalTime ? 'text-red-500' : 'text-wedding-olive'}`}>{usedTime}m</span>
-                </div>
-                <div className="w-px h-6 bg-stone-200" />
-                <div className="flex flex-col items-start">
-                  <span className="text-[10px] text-stone-400 uppercase tracking-tighter">{t.remaining}</span>
-                  <span className={`font-bold ${remainingTime < 0 ? 'text-red-500' : 'text-emerald-600'}`}>{remainingTime}m</span>
-                </div>
-              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-2">
+              <label className="cursor-pointer rounded-full border border-stone-200 bg-white px-2 py-2 text-xs font-medium text-wedding-olive">
+                {isImportingExcel ? '…' : language === 'ja' ? 'Excel読込' : 'Import Excel'}
+                <input type="file" aria-label={language === 'ja' ? 'Excel読込' : 'Import Excel'}
+                  className="sr-only" accept=".xlsx" disabled={isImportingExcel} onChange={handleImportExcel} />
+              </label>
+              <a
+                href="https://wedding.wawasensei.dev/plan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-stone-200 bg-white px-2 py-2 text-xs font-medium text-wedding-olive"
+              >
+                {language === 'ja' ? '配席プランナー' : 'Vow seating planner'} ↗
+              </a>
               <input
                 type="file"
                 id="import-json"
@@ -575,7 +597,7 @@ export default function App() {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-wedding-olive text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-3 sm:px-6 py-2.5 bg-wedding-olive text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 <span>{isSaving ? 'Saving...' : 'Save'}</span>
@@ -584,7 +606,7 @@ export default function App() {
               <button
                 onClick={handleExport}
                 disabled={selectedActivities.length === 0}
-                className="flex items-center gap-2 px-6 py-2.5 bg-wedding-gold text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-3 sm:px-6 py-2.5 bg-wedding-gold text-white rounded-full text-sm font-medium hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
                 <span>Excel</span>
@@ -592,16 +614,23 @@ export default function App() {
             </div>
           </div>
         </div>
+        <div className="mx-auto grid max-w-7xl grid-cols-3 gap-1 border-t border-stone-200 px-2 py-2 text-center text-xs sm:px-6" aria-live="polite">
+          <div>{language === 'ja' ? '進行数' : 'Activities'} <strong>{allActivities.length}</strong></div>
+          <div className={remainingTime < 0 ? 'text-red-700' : 'text-wedding-olive'}>
+            {language === 'ja' ? '時間差' : 'Time gap'} <strong>{remainingTime > 0 ? '+' : ''}{remainingTime}{language === 'ja' ? '分' : ' min'}</strong>
+          </div>
+          <div className="text-amber-800">{language === 'ja' ? '要確認' : 'Need review'} <strong>{reviewCount}</strong></div>
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
           {/* Left Sidebar - Configuration & Available Activities */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="min-w-0 lg:col-span-4 space-y-8">
             
             {/* Settings Card */}
-            <div className="glass-card rounded-[2rem] p-8">
+            <div className="glass-card rounded-[2rem] p-4 sm:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-wedding-olive/10 rounded-lg">
                   <Settings className="w-5 h-5 text-wedding-olive" />
@@ -644,26 +673,20 @@ export default function App() {
                 <div className="pt-6 border-t border-stone-100">
                   <h3 className="flex items-center gap-1.5 text-[10px] font-bold text-stone-400 mb-3 uppercase tracking-widest">
                     <Sparkles className="w-3 h-3 text-wedding-gold" />
-                    {t.autoPlan}
+                    {language === 'ja' ? '基本プラン' : 'Reception template'}
                   </h3>
-                  <textarea
-                    value={aiPrompt}
-                    onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="e.g., A modern 3-hour wedding with a focus on entertainment and guest interaction."
-                    className="w-full text-sm bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive placeholder:text-stone-300"
-                    rows={3}
-                  />
+                  <p className="text-xs text-stone-600">
+                    {language === 'ja'
+                      ? '開会からお見送りまで150分。受付と会場準備は開会前です。'
+                      : '150 minutes from opening to farewell. Setup and check-in are before opening.'}
+                  </p>
                   <button
-                    onClick={handleGenerateAiTimeline}
-                    disabled={isGenerating || !aiPrompt}
-                    className="w-full mt-3 bg-wedding-olive text-white px-4 py-3 text-sm rounded-xl hover:bg-opacity-90 disabled:opacity-50 transition-all flex items-center justify-center font-medium shadow-sm"
+                    type="button"
+                    onClick={handleLoadReception}
+                    className="w-full mt-3 bg-wedding-olive text-white px-4 py-3 text-sm rounded-xl font-medium shadow-sm"
                   >
-                    {isGenerating ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    ) : <Sparkles className="w-4 h-4 mr-2" />}
-                    {isGenerating ? t.generating : t.generatePlan}
+                    {language === 'ja' ? '1.5次会の基本プランを読み込む' : 'Load 1.5次会 template'}
                   </button>
-                  {aiError && <p className="text-xs text-red-500 mt-2 text-center">{aiError}</p>}
                 </div>
 
                 <div className="pt-6 border-t border-stone-100">
@@ -893,7 +916,7 @@ export default function App() {
             </div>
 
             {/* Activity Library Card */}
-            <div className="glass-card rounded-[2rem] p-8">
+            <div className="glass-card rounded-[2rem] p-4 sm:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-wedding-olive/10 rounded-lg">
                   <Plus className="w-5 h-5 text-wedding-olive" />
@@ -906,7 +929,7 @@ export default function App() {
             </div>
 
             {/* Add Custom Activity Card */}
-            <div className="glass-card rounded-[2rem] p-8">
+            <div className="glass-card rounded-[2rem] p-4 sm:p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2 bg-wedding-olive/10 rounded-lg">
                   <Plus className="w-5 h-5 text-wedding-olive" />
@@ -919,7 +942,7 @@ export default function App() {
                   placeholder="Activity name..."
                   value={customActivity.name}
                   onChange={(e) => setCustomActivity({ ...customActivity, name: e.target.value })}
-                  className="flex-1 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
+                  className="min-w-0 flex-1 bg-white/50 border-stone-200 rounded-xl shadow-sm focus:border-wedding-olive focus:ring-wedding-olive text-sm font-medium"
                 />
                 <div className="relative w-24">
                   <input
@@ -943,18 +966,18 @@ export default function App() {
           </div>
 
           {/* Right Main Area - Timeline */}
-          <div className="lg:col-span-8">
+          <div className="min-w-0 lg:col-span-8">
             <div className="glass-card rounded-[2.5rem] overflow-hidden min-h-[600px] flex flex-col">
-              <div className="px-8 py-6 border-b border-stone-100 bg-white/30 backdrop-blur-sm flex items-center justify-between">
+              <div className="px-4 sm:px-8 py-4 sm:py-6 gap-2 flex-wrap border-b border-stone-100 bg-white/30 backdrop-blur-sm flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-wedding-olive text-white rounded-lg shadow-sm">
                     <Calendar className="w-5 h-5" />
                   </div>
                   <h2 className="font-serif font-bold text-2xl text-wedding-olive">{t.timelineSection}</h2>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-1.5 bg-stone-100 rounded-full text-[10px] font-bold text-stone-500 uppercase tracking-widest">
+                <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-stone-100 rounded-full text-[10px] font-bold text-stone-500 uppercase tracking-widest">
                   <Sparkles className="w-3 h-3 text-wedding-gold" />
-                  {selectedActivities.length} {selectedActivities.length === 1 ? 'Activity' : 'Activities'}
+                  {language === 'ja' ? `${allActivities.length}項目` : `${allActivities.length} activities`}
                 </div>
               </div>
               
@@ -973,7 +996,7 @@ export default function App() {
                     </motion.div>
                     <h3 className="font-serif text-3xl text-wedding-ink mb-4">Your timeline is a blank canvas</h3>
                     <p className="text-stone-400 max-w-sm mx-auto leading-relaxed">
-                      Every great wedding starts with a plan. Add activities from the library or use our AI generator to begin your journey.
+                      Every great wedding starts with a plan. Add activities from the library or load the reception template to begin your journey.
                     </p>
                   </div>
                 ) : (

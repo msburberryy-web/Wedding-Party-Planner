@@ -1,3 +1,4 @@
+import { DEFAULT_MUSIC, type Activity } from '../constants/activities';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
@@ -12,6 +13,7 @@ export interface TimelineActivity {
   nameJa?: string;
   nameMy?: string;
   duration: number;
+  reviewStatus?: Activity['reviewStatus'];
   location?: string;
   style?: string;
   details?: string;
@@ -25,14 +27,14 @@ export interface TimelineActivity {
   coordinationNotesMy?: string;
   bgmUrl?: string;
   projector?: string;
-  staffNotes?: {
-    mc?: string;
-    photo?: string;
-    lighting?: string;
-    escort?: string;
-  };
+  staffNotes?: Activity['staffNotes'];
   isPrep?: boolean;
   startOffset?: number;
+  fixedStartOffset?: number;
+  omitTime?: boolean;
+  showTimeRange?: boolean;
+  staffText?: string;
+  endOffset?: number;
   subActivities?: TimelineActivity[];
 }
 
@@ -54,6 +56,41 @@ export interface WeddingMetadata {
   };
 }
 
+function getStaffLines(activity: TimelineActivity, language?: string): string[] {
+  const roles = [
+    ['mc', '司会', 'MC'],
+    ['escort', '誘導', 'Escort'],
+    ['photo', '撮影', 'Photo / video'],
+    ['planner', '進行', 'Planner'],
+    ['caterer', '配膳', 'Catering'],
+    ['lighting', '照明', 'Lighting'],
+    ['sound', '音響', 'Sound'],
+  ] as const;
+  const lines = roles.flatMap(([key, jaLabel, enLabel]) => {
+    const note = activity.staffNotes?.[key];
+    return note ? [`${language === 'ja' ? jaLabel : enLabel}：${note}`] : [];
+  });
+  if (activity.projector) {
+    lines.push(`${language === 'ja' ? '映像' : 'Projector'}：${activity.projector}`);
+  }
+  if (activity.staffText) lines.push(activity.staffText);
+  return lines;
+}
+
+function reviewLabel(activity: TimelineActivity, language?: string): string {
+  if (activity.reviewStatus === 'confirmed') return language === 'ja' ? '確認済み' : 'Confirmed';
+  return language === 'ja' ? '要確認' : 'Need review';
+}
+
+function fitProgramRow(row: ExcelJS.Row, minimumHeight: number) {
+  const columns = [[3, 23], [4, 18], [5, 42], [8, 23], [10, 30]] as const;
+  const lines = columns.map(([column, width]) => row.getCell(column).text.split('\n').reduce((sum, line) => {
+    const units = [...line].reduce((count, character) => count + (/[^\x00-\x7F]/.test(character) ? 2 : 1), 0);
+    return sum + Math.max(1, Math.ceil(units / width));
+  }, 0));
+  row.height = Math.min(405, Math.max(minimumHeight, Math.max(...lines) * 13 + 6));
+}
+
 export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: TimelineActivity[], language?: string) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Wedding Plan');
@@ -62,9 +99,9 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
   // Splitting original H (BGM) into H and I for the header section
   sheet.columns = [
     { width: 8,  style: { font: { name: 'MS P Mincho' } } }, // A: Time (Start)
-    { width: 8,  style: { font: { name: 'MS P Mincho' } } }, // B: Time (End)
+    { width: 20.86, style: { font: { name: 'MS P Mincho' } } }, // B: Time (End)
     { width: 25, style: { font: { name: 'MS P Mincho' } } }, // C: Activity Name
-    { width: 15, style: { font: { name: 'MS P Mincho' } } }, // D: Location
+    { width: 19.43, style: { font: { name: 'MS P Mincho' } } }, // D: Location
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // E: Content 1
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // F: Content 2
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // G: Content 3
@@ -258,7 +295,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     // Time (A:B)
     sheet.mergeCells(`A${currentRow}:B${currentRow}`);
     const timeCell = row.getCell(1);
-    timeCell.value = act.startTime;
+    timeCell.value = act.omitTime ? null : act.showTimeRange ? `${act.startTime} - ${act.endTime}` : act.startTime;
     timeCell.alignment = { horizontal: 'center', vertical: 'middle' };
     timeCell.font = { name: 'MS P Mincho', bold: true };
     timeCell.border = { left: { style: 'thick' }, right: { style: 'thin' }, bottom: { style: 'dotted' } };
@@ -277,8 +314,8 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
 
     // Location (D)
     const locCell = row.getCell(4);
-    locCell.value = act.location || '';
-    locCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    locCell.value = act.location || null;
+    locCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
     locCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
     // Content (E:G)
@@ -291,40 +328,35 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
       : act.coordinationNotes;
     const parts = [];
     if (act.style) parts.push(`【${act.style}】`);
-    if (resolvedNotes) parts.push(resolvedNotes);
-    contentCell.value = parts.join(' ');
+    if (resolvedNotes || act.details) parts.push(resolvedNotes || act.details!);
+    contentCell.value = [reviewLabel(act, language), parts.join(' ')].filter(Boolean).join('\n');
     contentCell.alignment = { vertical: 'middle', wrapText: true };
     contentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
     // BGM (H:I)
     sheet.mergeCells(`H${currentRow}:I${currentRow}`);
     const bgmCell = row.getCell(8);
-    let bgmText = '';
-    if (act.bgm) {
+    let bgmText = DEFAULT_MUSIC;
+    if (act.bgm?.trim()) {
         bgmCounter++;
         // Use circled numbers for 1-20, fallback to (N) for >20
         const circledNumber = bgmCounter <= 20 ? String.fromCharCode(0x2460 + bgmCounter - 1) : `(${bgmCounter})`;
         bgmText = `${circledNumber} ${act.bgm}`;
     }
     if (act.bgmUrl) bgmText = bgmText ? `${bgmText}\n${act.bgmUrl}` : act.bgmUrl;
-    bgmCell.value = bgmText;
+    bgmCell.value = bgmText || null;
     bgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
     bgmCell.alignment = { vertical: 'middle', wrapText: true };
     bgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
     // Staff Attention (J) — stacked icon lines in one cell
     const staffCell = row.getCell(10);
-    const staffLines: string[] = [];
-    if (act.staffNotes?.mc)       staffLines.push(`🎤 ${act.staffNotes.mc}`);
-    if (act.staffNotes?.photo)    staffLines.push(`📸 ${act.staffNotes.photo}`);
-    if (act.staffNotes?.lighting) staffLines.push(`💡 ${act.staffNotes.lighting}`);
-    if (act.staffNotes?.escort)   staffLines.push(`🧭 ${act.staffNotes.escort}`);
-    if (act.projector)            staffLines.push(`📽 ${act.projector}`);
+    const staffLines = getStaffLines(act, language);
     staffCell.value = staffLines.join('\n');
     staffCell.font = { name: 'MS P Mincho', size: 9 };
     staffCell.alignment = { vertical: 'top', wrapText: true };
     staffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
-    if (staffLines.length > 0) row.height = Math.max(35, staffLines.length * 28);
+    fitProgramRow(row, 35);
 
     currentRow++;
 
@@ -339,7 +371,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             const subTimeCell = subRow.getCell(1);
             const subStart = sub.startTime || '--:--';
             const subEnd = sub.endTime || '--:--';
-            subTimeCell.value = `${subStart} - ${subEnd}`;
+            subTimeCell.value = sub.omitTime ? null : `${subStart} - ${subEnd}`;
             subTimeCell.alignment = { horizontal: 'center', vertical: 'middle' };
             subTimeCell.font = { name: 'MS P Mincho', size: 9, italic: true };
             subTimeCell.border = { left: { style: 'thick' }, right: { style: 'thin' }, bottom: { style: 'dotted' } };
@@ -348,14 +380,14 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             const subNameCell = subRow.getCell(3);
             const subDurationText = sub.duration ? ` (${sub.duration}m)` : '';
             subNameCell.value = `  ↳ ${sub.name}${subDurationText}`;
-            subNameCell.alignment = { vertical: 'middle', indent: 2 };
+            subNameCell.alignment = { vertical: 'middle', indent: 2, wrapText: true };
             subNameCell.font = { name: 'MS P Mincho', size: 10, color: { argb: 'FF444444' } };
             subNameCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
             // Location
             const subLocCell = subRow.getCell(4);
-            subLocCell.value = sub.location || '';
-            subLocCell.alignment = { horizontal: 'center', vertical: 'middle' };
+            subLocCell.value = sub.location || null;
+            subLocCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
             subLocCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
             // Content
@@ -368,27 +400,31 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
               : sub.coordinationNotes;
             const subParts = [];
             if (sub.style) subParts.push(`【${sub.style}】`);
-            if (resolvedSubNotes) subParts.push(resolvedSubNotes);
-            subContentCell.value = subParts.join(' ');
+            if (resolvedSubNotes || sub.details) subParts.push(resolvedSubNotes || sub.details!);
+            subContentCell.value = [reviewLabel(sub, language), subParts.join(' ')].filter(Boolean).join('\n');
             subContentCell.alignment = { vertical: 'middle', wrapText: true };
             subContentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
             // BGM
             sheet.mergeCells(`H${currentRow}:I${currentRow}`);
             const subBgmCell = subRow.getCell(8);
-            let subBgmText = '';
-            if (sub.bgm) {
+            let subBgmText = DEFAULT_MUSIC;
+            if (sub.bgm?.trim()) {
                 bgmCounter++;
                 const circledNumber = bgmCounter <= 20 ? String.fromCharCode(0x2460 + bgmCounter - 1) : `(${bgmCounter})`;
                 subBgmText = `${circledNumber} ${sub.bgm}`;
             }
-            subBgmCell.value = subBgmText;
+            if (sub.bgmUrl) subBgmText = subBgmText ? `${subBgmText}\n${sub.bgmUrl}` : sub.bgmUrl;
+            subBgmCell.value = subBgmText || null;
             subBgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
             subBgmCell.alignment = { vertical: 'middle', wrapText: true };
             subBgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
-            // Empty J cell for sub-activity
             const subStaffCell = subRow.getCell(10);
+            const subStaffLines = getStaffLines(sub, language);
+            subStaffCell.value = subStaffLines.join('\n');
+            subStaffCell.alignment = { vertical: 'top', wrapText: true };
+            fitProgramRow(subRow, 25);
             subStaffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
 
             currentRow++;
