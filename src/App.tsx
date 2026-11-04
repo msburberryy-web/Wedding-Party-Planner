@@ -204,6 +204,36 @@ export default function App() {
     reader.readAsText(file);
   };
 
+  const [isImportingExcel, setIsImportingExcel] = useState(false);
+
+  const handleImportExcel = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.currentTarget.files?.[0];
+    event.currentTarget.value = '';
+    if (!file) return;
+    setIsImportingExcel(true);
+    try {
+      if (file.size > 10 * 1024 * 1024) throw new Error('10 MB以下のExcelファイルを選んでください。');
+      const { importWeddingExcel } = await import('./utils/excelImporter');
+      const plan = await importWeddingExcel(await file.arrayBuffer());
+      if (selectedActivities.length && !window.confirm(language === 'ja'
+        ? '現在の進行表を読み込んだExcelで置き換えますか？'
+        : 'Replace the current timeline with this Excel sheet?')) return;
+      setSelectedActivities(plan.activities);
+      setMetadata(plan.metadata);
+      setStartTime(plan.startTime);
+      setTotalTime(RECEPTION_MINUTES);
+      setPlanId(null);
+      setLastSaved(null);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('planId');
+      window.history.replaceState(null, '', url);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Excelを読み込めませんでした。');
+    } finally {
+      setIsImportingExcel(false);
+    }
+  };
+
   // Calculate timeline
   const timeline: TimelineActivity[] = useMemo(() => {
     try {
@@ -222,9 +252,9 @@ export default function App() {
       let currentMain = mainStart;
       for (let i = anchorIndex; i < selectedActivities.length; i++) {
         const act = selectedActivities[i];
-        const start = format(currentMain, 'HH:mm');
-        const actStart = currentMain;
-        currentMain = addMinutes(currentMain, act.duration);
+        const actStart = act.fixedStartOffset === undefined ? currentMain : addMinutes(mainStart, act.fixedStartOffset);
+        const start = format(actStart, 'HH:mm');
+        currentMain = addMinutes(actStart, act.duration);
         const end = format(currentMain, 'HH:mm');
 
         // Calculate Sub-activities
@@ -238,17 +268,18 @@ export default function App() {
             };
         });
 
-        calculated[i] = { ...act, startTime: start, endTime: end, subActivities };
+        calculated[i] = { ...act, startTime: start, endTime: end, endOffset: differenceInMinutes(currentMain, mainStart), subActivities };
       }
 
       // Calculate backwards from anchor
       let currentPrep = mainStart;
       for (let i = anchorIndex - 1; i >= 0; i--) {
         const act = selectedActivities[i];
-        const end = format(currentPrep, 'HH:mm');
-        currentPrep = addMinutes(currentPrep, -act.duration);
-        const start = format(currentPrep, 'HH:mm');
-        const actStart = currentPrep;
+        const actStart = act.fixedStartOffset === undefined
+          ? addMinutes(currentPrep, -act.duration) : addMinutes(mainStart, act.fixedStartOffset);
+        const end = format(addMinutes(actStart, act.duration), 'HH:mm');
+        const start = format(actStart, 'HH:mm');
+        currentPrep = actStart;
 
         // Calculate Sub-activities
         const subActivities = act.subActivities?.map(sub => {
@@ -270,10 +301,11 @@ export default function App() {
     }
   }, [startTime, selectedActivities]);
 
-  const usedTime = selectedActivities
-    .filter(a => !a.isPrep)
-    .reduce((acc, curr) => acc + curr.duration, 0);
+  const usedTime = timeline.reduce((minutes, activity) =>
+    activity.isPrep ? minutes : Math.max(minutes, activity.endOffset ?? 0), 0);
   const remainingTime = totalTime - usedTime;
+  const allActivities = selectedActivities.flatMap(activity => [activity, ...(activity.subActivities ?? [])]);
+  const reviewCount = allActivities.filter(activity => activity.reviewStatus !== 'confirmed').length;
 
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
@@ -406,6 +438,11 @@ export default function App() {
       // Calculate how many minutes from the global startTime this activity currently starts
       const currentStart = parse(timeline[actIndex].startTime, 'HH:mm', new Date());
       const globalStart = parse(startTime, 'HH:mm', new Date());
+      if (timeline[actIndex].fixedStartOffset !== undefined || timeline[actIndex].omitTime) {
+        const fixedStartOffset = differenceInMinutes(newStart, globalStart);
+        if (Number.isFinite(fixedStartOffset)) handleUpdateActivity(activityId, { fixedStartOffset, omitTime: false });
+        return;
+      }
       const offsetMinutes = differenceInMinutes(currentStart, globalStart);
       
       // The new global start time should be newStart - offsetMinutes
@@ -518,20 +555,14 @@ export default function App() {
                 </select>
               </div>
 
-              <div className="hidden md:flex items-center gap-3 text-xs font-mono">
-                <div className="flex flex-col items-end">
-                  <span className="text-[10px] text-stone-400 uppercase tracking-tighter">{t.used}</span>
-                  <span className={`font-bold ${usedTime > totalTime ? 'text-red-500' : 'text-wedding-olive'}`}>{usedTime}m</span>
-                </div>
-                <div className="w-px h-6 bg-stone-200" />
-                <div className="flex flex-col items-start">
-                  <span className="text-[10px] text-stone-400 uppercase tracking-tighter">{t.remaining}</span>
-                  <span className={`font-bold ${remainingTime < 0 ? 'text-red-500' : 'text-emerald-600'}`}>{remainingTime}m</span>
-                </div>
-              </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-1 sm:gap-2">
+              <label className="cursor-pointer rounded-full border border-stone-200 bg-white px-2 py-2 text-xs font-medium text-wedding-olive">
+                {isImportingExcel ? '…' : language === 'ja' ? 'Excel読込' : 'Import Excel'}
+                <input type="file" aria-label={language === 'ja' ? 'Excel読込' : 'Import Excel'}
+                  className="sr-only" accept=".xlsx" disabled={isImportingExcel} onChange={handleImportExcel} />
+              </label>
               <input
                 type="file"
                 id="import-json"
@@ -574,6 +605,13 @@ export default function App() {
               </button>
             </div>
           </div>
+        </div>
+        <div className="mx-auto grid max-w-7xl grid-cols-3 gap-1 border-t border-stone-200 px-2 py-2 text-center text-xs sm:px-6" aria-live="polite">
+          <div>{language === 'ja' ? '進行数' : 'Activities'} <strong>{allActivities.length}</strong></div>
+          <div className={remainingTime < 0 ? 'text-red-700' : 'text-wedding-olive'}>
+            {language === 'ja' ? '時間差' : 'Time gap'} <strong>{remainingTime > 0 ? '+' : ''}{remainingTime}{language === 'ja' ? '分' : ' min'}</strong>
+          </div>
+          <div className="text-amber-800">{language === 'ja' ? '要確認' : 'Need review'} <strong>{reviewCount}</strong></div>
         </div>
       </header>
 
@@ -931,11 +969,8 @@ export default function App() {
                 </div>
                 <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-stone-100 rounded-full text-[10px] font-bold text-stone-500 uppercase tracking-widest">
                   <Sparkles className="w-3 h-3 text-wedding-gold" />
-                  {language === 'ja' ? `${selectedActivities.length}項目` : `${selectedActivities.length} activities`}
+                  {language === 'ja' ? `${allActivities.length}項目` : `${allActivities.length} activities`}
                 </div>
-                <span className={`shrink-0 text-xs font-bold md:hidden ${remainingTime < 0 ? 'text-red-700' : 'text-wedding-olive'}`}>
-                  {t.remaining} {remainingTime}{language === 'ja' ? '分' : 'm'}
-                </span>
               </div>
               
               <div className="flex-1 p-4 sm:p-8">

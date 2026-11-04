@@ -30,6 +30,11 @@ export interface TimelineActivity {
   staffNotes?: Activity['staffNotes'];
   isPrep?: boolean;
   startOffset?: number;
+  fixedStartOffset?: number;
+  omitTime?: boolean;
+  showTimeRange?: boolean;
+  staffText?: string;
+  endOffset?: number;
   subActivities?: TimelineActivity[];
 }
 
@@ -68,12 +73,22 @@ function getStaffLines(activity: TimelineActivity, language?: string): string[] 
   if (activity.projector) {
     lines.push(`${language === 'ja' ? '映像' : 'Projector'}：${activity.projector}`);
   }
+  if (activity.staffText) lines.push(activity.staffText);
   return lines;
 }
 
 function reviewLabel(activity: TimelineActivity, language?: string): string {
   if (activity.reviewStatus === 'confirmed') return language === 'ja' ? '確認済み' : 'Confirmed';
   return language === 'ja' ? '要確認' : 'Need review';
+}
+
+function fitProgramRow(row: ExcelJS.Row, minimumHeight: number) {
+  const columns = [[3, 23], [4, 18], [5, 42], [8, 23], [10, 30]] as const;
+  const lines = columns.map(([column, width]) => row.getCell(column).text.split('\n').reduce((sum, line) => {
+    const units = [...line].reduce((count, character) => count + (/[^\x00-\x7F]/.test(character) ? 2 : 1), 0);
+    return sum + Math.max(1, Math.ceil(units / width));
+  }, 0));
+  row.height = Math.min(405, Math.max(minimumHeight, Math.max(...lines) * 13 + 6));
 }
 
 export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: TimelineActivity[], language?: string) => {
@@ -280,7 +295,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     // Time (A:B)
     sheet.mergeCells(`A${currentRow}:B${currentRow}`);
     const timeCell = row.getCell(1);
-    timeCell.value = act.startTime;
+    timeCell.value = act.omitTime ? null : act.showTimeRange ? `${act.startTime} - ${act.endTime}` : act.startTime;
     timeCell.alignment = { horizontal: 'center', vertical: 'middle' };
     timeCell.font = { name: 'MS P Mincho', bold: true };
     timeCell.border = { left: { style: 'thick' }, right: { style: 'thin' }, bottom: { style: 'dotted' } };
@@ -300,7 +315,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     // Location (D)
     const locCell = row.getCell(4);
     locCell.value = act.location || null;
-    locCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    locCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
     locCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
     // Content (E:G)
@@ -341,7 +356,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
     staffCell.font = { name: 'MS P Mincho', size: 9 };
     staffCell.alignment = { vertical: 'top', wrapText: true };
     staffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
-    if (staffLines.length > 0) row.height = Math.max(35, staffLines.length * 28);
+    fitProgramRow(row, 35);
 
     currentRow++;
 
@@ -356,7 +371,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             const subTimeCell = subRow.getCell(1);
             const subStart = sub.startTime || '--:--';
             const subEnd = sub.endTime || '--:--';
-            subTimeCell.value = `${subStart} - ${subEnd}`;
+            subTimeCell.value = sub.omitTime ? null : `${subStart} - ${subEnd}`;
             subTimeCell.alignment = { horizontal: 'center', vertical: 'middle' };
             subTimeCell.font = { name: 'MS P Mincho', size: 9, italic: true };
             subTimeCell.border = { left: { style: 'thick' }, right: { style: 'thin' }, bottom: { style: 'dotted' } };
@@ -365,14 +380,14 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             const subNameCell = subRow.getCell(3);
             const subDurationText = sub.duration ? ` (${sub.duration}m)` : '';
             subNameCell.value = `  ↳ ${sub.name}${subDurationText}`;
-            subNameCell.alignment = { vertical: 'middle', indent: 2 };
+            subNameCell.alignment = { vertical: 'middle', indent: 2, wrapText: true };
             subNameCell.font = { name: 'MS P Mincho', size: 10, color: { argb: 'FF444444' } };
             subNameCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
             // Location
             const subLocCell = subRow.getCell(4);
             subLocCell.value = sub.location || null;
-            subLocCell.alignment = { horizontal: 'center', vertical: 'middle' };
+            subLocCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
             subLocCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
             // Content
@@ -409,7 +424,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
             const subStaffLines = getStaffLines(sub, language);
             subStaffCell.value = subStaffLines.join('\n');
             subStaffCell.alignment = { vertical: 'top', wrapText: true };
-            subRow.height = Math.max(25, subStaffLines.length * 28);
+            fitProgramRow(subRow, 25);
             subStaffCell.border = { right: { style: 'thick' }, bottom: { style: 'dotted' } };
 
             currentRow++;

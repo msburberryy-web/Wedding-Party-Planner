@@ -34,6 +34,10 @@ export type Activity = {
   };
   isPrep?: boolean;
   startOffset?: number;
+  fixedStartOffset?: number;
+  omitTime?: boolean;
+  showTimeRange?: boolean;
+  staffText?: string;
   subActivities?: Activity[];
 };
 

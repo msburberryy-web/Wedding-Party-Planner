@@ -121,6 +121,12 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
               {activity.startTime}
             </span>
           )}
+          {activity.fixedStartOffset !== undefined && (
+            <button type="button" className="self-start text-xs text-wedding-olive underline"
+              onClick={() => onUpdateActivity?.(activity.id, { fixedStartOffset: undefined })}>
+              {language === 'ja' ? '時刻固定を解除' : 'Unlock time'}
+            </button>
+          )}
           <div className="flex items-center gap-1 text-xs text-stone-400 mt-1">
             <Clock className="w-3 h-3" />
             <input
@@ -412,7 +418,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
 function ActivityFields({ activity, language, update }: {
   activity: TimelineActivity;
   language: Language;
-  update: (field: 'reviewStatus' | 'bgm', value: string) => void;
+  update: (field: 'reviewStatus' | 'bgm' | 'staffText', value: string) => void;
 }) {
   const needsReview = activity.reviewStatus !== 'confirmed';
   return (
@@ -432,6 +438,13 @@ function ActivityFields({ activity, language, update }: {
           onChange={event => update('bgm', event.target.value)}
           className="w-full min-w-0 rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-base" />
       </label>
+      {activity.staffText !== undefined && (
+        <label className="grid min-w-0 gap-1 text-xs text-stone-600 sm:col-span-2">
+          {language === 'ja' ? 'スタッフメモ（Excel）' : 'Staff notes (Excel)'}
+          <textarea value={activity.staffText} onChange={event => update('staffText', event.target.value)}
+            rows={2} className="w-full min-w-0 rounded-lg border border-stone-200 bg-white px-2 py-1.5 text-base" />
+        </label>
+      )}
     </div>
   );
 }
