@@ -78,9 +78,9 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
   // Splitting original H (BGM) into H and I for the header section
   sheet.columns = [
     { width: 8,  style: { font: { name: 'MS P Mincho' } } }, // A: Time (Start)
-    { width: 8,  style: { font: { name: 'MS P Mincho' } } }, // B: Time (End)
+    { width: 20.86, style: { font: { name: 'MS P Mincho' } } }, // B: Time (End)
     { width: 25, style: { font: { name: 'MS P Mincho' } } }, // C: Activity Name
-    { width: 15, style: { font: { name: 'MS P Mincho' } } }, // D: Location
+    { width: 19.43, style: { font: { name: 'MS P Mincho' } } }, // D: Location
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // E: Content 1
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // F: Content 2
     { width: 15, style: { font: { name: 'MS P Mincho' } } }, // G: Content 3
@@ -293,7 +293,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
 
     // Location (D)
     const locCell = row.getCell(4);
-    locCell.value = act.location || '';
+    locCell.value = act.location || null;
     locCell.alignment = { horizontal: 'center', vertical: 'middle' };
     locCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
@@ -307,8 +307,8 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
       : act.coordinationNotes;
     const parts = [];
     if (act.style) parts.push(`【${act.style}】`);
-    if (resolvedNotes) parts.push(resolvedNotes);
-    contentCell.value = parts.join(' ');
+    if (resolvedNotes || act.details) parts.push(resolvedNotes || act.details!);
+    contentCell.value = parts.join(' ') || null;
     contentCell.alignment = { vertical: 'middle', wrapText: true };
     contentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
@@ -323,7 +323,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
         bgmText = `${circledNumber} ${act.bgm}`;
     }
     if (act.bgmUrl) bgmText = bgmText ? `${bgmText}\n${act.bgmUrl}` : act.bgmUrl;
-    bgmCell.value = bgmText;
+    bgmCell.value = bgmText || null;
     bgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
     bgmCell.alignment = { vertical: 'middle', wrapText: true };
     bgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
@@ -365,7 +365,7 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
 
             // Location
             const subLocCell = subRow.getCell(4);
-            subLocCell.value = sub.location || '';
+            subLocCell.value = sub.location || null;
             subLocCell.alignment = { horizontal: 'center', vertical: 'middle' };
             subLocCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
@@ -379,8 +379,8 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
               : sub.coordinationNotes;
             const subParts = [];
             if (sub.style) subParts.push(`【${sub.style}】`);
-            if (resolvedSubNotes) subParts.push(resolvedSubNotes);
-            subContentCell.value = subParts.join(' ');
+            if (resolvedSubNotes || sub.details) subParts.push(resolvedSubNotes || sub.details!);
+            subContentCell.value = subParts.join(' ') || null;
             subContentCell.alignment = { vertical: 'middle', wrapText: true };
             subContentCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
 
@@ -393,7 +393,8 @@ export const generateWeddingExcel = async (metadata: WeddingMetadata, timeline: 
                 const circledNumber = bgmCounter <= 20 ? String.fromCharCode(0x2460 + bgmCounter - 1) : `(${bgmCounter})`;
                 subBgmText = `${circledNumber} ${sub.bgm}`;
             }
-            subBgmCell.value = subBgmText;
+            if (sub.bgmUrl) subBgmText = subBgmText ? `${subBgmText}\n${sub.bgmUrl}` : sub.bgmUrl;
+            subBgmCell.value = subBgmText || null;
             subBgmCell.font = { name: 'MS P Mincho', italic: true, color: { argb: 'FF888888' } };
             subBgmCell.alignment = { vertical: 'middle', wrapText: true };
             subBgmCell.border = { right: { style: 'thin' }, bottom: { style: 'dotted' } };
