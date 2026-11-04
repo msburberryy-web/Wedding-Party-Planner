@@ -77,9 +77,9 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative min-w-0 pl-12 pr-2 sm:pr-4 py-4 group [overflow-wrap:anywhere] ${
-        activity.isImportant ? 'bg-wedding-olive/5' : 'hover:bg-white/50'
-      } ${isDragging ? 'shadow-2xl ring-2 ring-wedding-olive/20 rounded-2xl bg-white' : ''}`}
+      className={`relative min-w-0 my-2 rounded-xl border pl-12 pr-3 py-4 shadow-sm group [overflow-wrap:anywhere] ${
+        activity.isImportant ? 'border-wedding-olive/35 bg-wedding-cream' : 'border-stone-300 bg-white'
+      } ${isDragging ? 'shadow-2xl ring-2 ring-wedding-olive/20 bg-white' : ''}`}
     >
       {/* Drag Handle */}
       <button
@@ -92,10 +92,6 @@ const TimelineItem: React.FC<TimelineItemProps> = ({
       >
         <GripVertical className="w-5 h-5" />
       </button>
-      {/* Timeline Connector */}
-      <div className="timeline-line pointer-events-none hidden md:block" />
-      <div className={`timeline-dot pointer-events-none hidden md:block ${activity.isImportant ? 'scale-150 ring-4 ring-wedding-olive/20' : ''}`} />
-
       <div className="flex flex-col xl:flex-row xl:items-start gap-3">
         {/* Time and Duration */}
         <div className="flex flex-col min-w-[100px]">
