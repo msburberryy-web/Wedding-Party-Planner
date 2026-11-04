@@ -1,4 +1,4 @@
-import { OWNER_COLORS, VENDOR_SECTION, programPreparations, type VendorArrival } from '../constants/programPreparation';
+import { VENDOR_SECTION, programPreparations, type VendorArrival } from '../constants/programPreparation';
 import { DEFAULT_MUSIC, type Activity } from '../constants/activities';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -86,17 +86,11 @@ function reviewLabel(activity: TimelineActivity, language?: string): string {
 }
 
 function programContent(activity: TimelineActivity, notes: string, language?: string): ExcelJS.CellValue {
-  const base = [reviewLabel(activity, language), notes].filter(Boolean).join('\n');
-  const preparations = programPreparations(activity).filter(row => row.item.trim());
-  if (!preparations.length) return activity.preparations === undefined ? base : base + '\n準備｜なし';
-  return { richText: [
-    { text: base },
-    ...preparations.flatMap(({ item, owner, readyTime }) => [
-      { text: `\n準備｜${item.replace(/\s+/g, ' ').trim()}｜` },
-      { text: owner, font: { bold: true, color: { argb: OWNER_COLORS[owner] } } },
-      { text: `｜${readyTime || '開始前'}` },
-    ]),
-  ] };
+  const preparations = programPreparations(activity).flatMap(({ item }) =>
+    item.split(/\r?\n/).map(line => line.trim()).filter(Boolean));
+  const memoLines = preparations.map(item => `準備メモ｜${item}`);
+  if (!memoLines.length && activity.preparations !== undefined) memoLines.push('準備｜なし');
+  return [reviewLabel(activity, language), notes, ...memoLines].filter(Boolean).join('\n');
 }
 
 function fitProgramRow(row: ExcelJS.Row, minimumHeight: number) {
